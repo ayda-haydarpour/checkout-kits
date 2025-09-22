@@ -1,29 +1,73 @@
 <!doctype html>
-</form>
-</section>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="manifest" href="./manifest.json"/>
+  <link rel="stylesheet" href="./style.css"/>
+  <meta name="theme-color" content="#ffffff"/>
+  <title>Kit Details</title>
+</head>
+<body>
+  <a class="back" href="./index.html">← Back</a>
+  <main class="kit">
+    <div class="left">
+      <img id="img" src="" alt=""/>
+      <div class="qrcode" id="qrcode"></div>
+    </div>
+    <div class="right">
+      <h1 id="name">Loading…</h1>
+      <p id="meta"></p>
+      <p id="desc" class="desc"></p>
 
-<p id="msg" class="msg"></p>
-</div>
-</main>
+      <section>
+        <h2>Checkout</h2>
+        <form id="checkout-form">
+          <label>Name <input name="borrower_name" required /></label>
+          <label>Email <input type="email" name="borrower_email" required /></label>
+          <label>Days <input type="number" name="days" min="1" value="7"/></label>
+          <button type="submit">Checkout</button>
+        </form>
+      </section>
 
-<script src="./js/qrcode.min.js"></script>
-<script type="module" src="./js/kit.js"></script>
-<script type="module">
-import { apiPost } from './js/api.js';
-const btn = document.querySelector('#waitlist-btn');
-const form = document.querySelector('#waitlist-form');
-function getId(){ const u = new URL(location.href); return u.searchParams.get('id'); }
-btn.addEventListener('click', async () => {
-const fd = new FormData(form);
-const res = await apiPost('waitlist', {
-kit_id: getId(),
-requester_name: fd.get('requester_name'),
-requester_email: fd.get('requester_email')
-});
-const msg = document.querySelector('#msg');
-msg.textContent = res.ok ? 'Added to waitlist! Check your email.' : (res.error||'Error');
-});
-</script>
+      <section>
+        <h2>Return</h2>
+        <form id="return-form">
+          <label>Email <input type="email" name="borrower_email" required /></label>
+          <button type="submit">Return</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Waitlist</h2>
+        <form id="waitlist-form">
+          <label>Name <input name="requester_name" required /></label>
+          <label>Email <input type="email" name="requester_email" required /></label>
+          <button id="waitlist-btn" type="button">Join Waitlist</button>
+        </form>
+      </section>
+
+      <p id="msg" class="msg"></p>
+    </div>
+  </main>
+
+  <script src="./js/qrcode.min.js"></script>
+  <script type="module" src="./js/kit.js"></script>
+  <script type="module">
+    import { apiPost } from './js/api.js';
+    const btn = document.querySelector('#waitlist-btn');
+    const form = document.querySelector('#waitlist-form');
+    function getId(){ const u = new URL(location.href); return u.searchParams.get('id'); }
+    btn.addEventListener('click', async () => {
+      const fd = new FormData(form);
+      const res = await apiPost('waitlist', {
+        kit_id: getId(),
+        requester_name: fd.get('requester_name'),
+        requester_email: fd.get('requester_email')
+      });
+      const msg = document.querySelector('#msg');
+      msg.textContent = res.ok ? 'Added to waitlist! Check your email.' : (res.error||'Error');
+    });
+  </script>
 </body>
 </html>
-
