@@ -14,12 +14,31 @@ body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Aria
 .logo-dot{width:14px;height:14px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px rgba(207,68,32,.25)}
 .brand h1{margin:0;font-size:1.15rem;font-weight:700}
 .filters{display:flex;gap:.6rem;align-items:center}
+
+/* Search + select in header */
 .filters input,.filters select{
   width:260px;max-width:48vw;padding:.65rem .8rem;border:1px solid rgba(255,255,255,.35);
   border-radius:.65rem;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);color:#fff;
 }
 .filters input::placeholder{color:rgba(255,255,255,.85)}
 .filters select option{color:#111}
+
+/* search suggestions */
+.search-wrap{ position: relative; display:flex; flex-direction:column; }
+#search{ position: relative; z-index: 2; }
+.suggestions{
+  position:absolute; top:calc(100% + 6px); left:0; right:0;
+  background:#fff; color:#111; border:1px solid var(--border); border-radius:.65rem;
+  box-shadow: var(--shadow); padding:.35rem; display:none; max-height: 260px; overflow:auto; z-index: 20;
+}
+.suggestions.show{ display:block; }
+.suggestion{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.55rem .65rem; border-radius:.5rem; cursor:pointer;
+}
+.suggestion:hover, .suggestion.active{ background:#f8f8fb; }
+.suggestion .hint{ color: var(--muted); font-size:.85rem; margin-left: .6rem; }
+.suggestion .chip{ font-size:.72rem; padding:.15rem .4rem; border-radius:.5rem; border:1px solid var(--border); background:#fff; color:var(--maroon); }
 
 /* Toolbar */
 .toolbar{display:flex;justify-content:space-between;align-items:center;padding:1rem 0}
