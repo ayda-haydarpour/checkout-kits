@@ -13,8 +13,13 @@
         <div class="logo-dot" aria-hidden="true"></div>
         <h1>Equipment Kiosk</h1>
       </div>
+
       <div class="filters">
-        <input id="search" type="search" placeholder="Search kits, tags, descriptions…" aria-label="Search" />
+        <div class="search-wrap">
+          <input id="search" type="search" placeholder="Search kits, tags, categories…" aria-label="Search" autocomplete="off" />
+          <div id="suggestions" class="suggestions" role="listbox" aria-label="Suggestions"></div>
+        </div>
+
         <select id="category" aria-label="Filter by category">
           <option value="">All categories</option>
         </select>
@@ -31,6 +36,7 @@
         <span class="badge out">Out</span>
       </div>
     </section>
+
     <section id="kit-list" class="grid wrap" aria-live="polite"></section>
   </main>
 
