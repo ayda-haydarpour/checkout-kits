@@ -31,7 +31,7 @@
     "available_qty": 2,
     "image_url": "",
     "location": "Take and Create Stand",
-    "description": "This project will help you get more familiar with using the Dremel...",
+    "description": "Use the Dremel to sand and finish a wooden mancala board — a fun functional project.",
     "tags": "dremel,game,wood",
     "active": true
   },
@@ -43,7 +43,7 @@
     "available_qty": 4,
     "image_url": "",
     "location": "Take and Create Stand",
-    "description": "Learn basic setup and stitching on the sewing machine by creating your own pencil pouch.",
+    "description": "Learn basic setup and stitching on the sewing machine by making your own pencil pouch.",
     "tags": "sewing,fabric,crafts",
     "active": true
   },
@@ -55,7 +55,7 @@
     "available_qty": 3,
     "image_url": "",
     "location": "Take and Create Stand",
-    "description": "Leather crafting with a hole punch and rivet setter to create your own keychain.",
+    "description": "Practice leather crafting using a hole punch and rivet setter to create a keychain.",
     "tags": "leather,keychain,crafts",
     "active": true
   }
