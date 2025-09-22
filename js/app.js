@@ -25,6 +25,7 @@ const LS_LOANS = 'kiosk_loans_v1';
 function getLoans(){ try { return JSON.parse(localStorage.getItem(LS_LOANS)||'[]'); } catch{ return []; } }
 function setLoans(loans){ localStorage.setItem(LS_LOANS, JSON.stringify(loans)); }
 
+// availability derived from base available_qty minus OPEN local loans
 function availabilityFor(k){
   const open = getLoans().filter(l => l.kit_id===k.kit_id && l.status==='OPEN').length;
   return Math.max(0, Number(k.available_qty||0) - open);
@@ -53,7 +54,7 @@ function cardThumb(k) {
   return `<div class="thumb"><div style="font-size:2.5rem">${(k.name||'?')[0].toUpperCase()}</div></div>`;
 }
 
-/* Card with explicit labels */
+/* Card with explicit labels and consistent structure */
 function card(k){
   const tags = (k.tags||'')
     .split(',')
@@ -80,7 +81,7 @@ function card(k){
   `;
 }
 
-// ---------- render list ----------
+/* ---------- render list ---------- */
 function renderList(){
   const q = (searchEl.value||'').toLowerCase().trim();
   const cat = (categoryEl.value||'').toLowerCase().trim();
@@ -94,13 +95,13 @@ function renderList(){
   listEl.innerHTML = filtered.map(card).join('');
 }
 
-// ---------- categories ----------
+/* ---------- categories ---------- */
 function populateCategory(){
   const cats = Array.from(new Set(KITS.map(k=>String(k.category||'').toLowerCase()).filter(Boolean)));
   categoryEl.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
-// ---------- modal ----------
+/* ---------- modal ---------- */
 function openModalById(id){
   const k = KITS.find(x=>x.kit_id===id); if (!k) return;
   CURRENT = k;
@@ -123,7 +124,7 @@ function openModalById(id){
 }
 function closeModal(){ modal.classList.add('hidden'); }
 
-// ---------- suggestions ----------
+/* ---------- suggestions (type-ahead) ---------- */
 let activeIndex = -1;
 function buildSuggestions(query){
   const q = query.toLowerCase().trim();
@@ -175,7 +176,7 @@ function pickSuggestion(el){
   }
 }
 
-// ---------- wiring ----------
+/* ---------- wiring ---------- */
 function wireUI(){
   // modal
   modalClose.addEventListener('click', closeModal);
@@ -196,7 +197,7 @@ function wireUI(){
   searchEl.addEventListener('blur',    () => setTimeout(hideSuggestions, 120)); // allow click
   categoryEl.addEventListener('change', renderList);
 
-  // suggestions click + keyboard
+  // suggestions click + keyboard nav
   suggestionsEl.addEventListener('click', (e) => {
     const item = e.target.closest('.suggestion');
     if (item) pickSuggestion(item);
@@ -245,7 +246,7 @@ function wireUI(){
   });
 }
 
-// ---------- load data (with fallback) ----------
+/* ---------- load data (with fallback) ---------- */
 async function load(){
   const SAMPLE = [
     { kit_id:'KIT-00001', name:'Woodburning Kit', category:'woodworking', total_qty:2, available_qty:2, image_url:'', location:'Take and Create Stand', description:'Learn burning techniques and finish with an art piece.', tags:'wood,art,crafts', active:true },
