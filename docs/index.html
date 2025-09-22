@@ -3,23 +3,71 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="manifest" href="./manifest.json" />
-<link rel="stylesheet" href="./styles.css" />
-<meta name="theme-color" content="#ffffff" />
 <title>Equipment Kiosk</title>
+<link rel="stylesheet" href="./style.css" />
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#ffffff" />
 </head>
 <body>
-<header>
+<header class="site-header">
+<div class="wrap">
+<div class="brand">
+<div class="logo-dot" aria-hidden="true"></div>
 <h1>Equipment Kiosk</h1>
-<input id="search" type="search" placeholder="Search by name, tag, etc." />
-<select id="category"></select>
+</div>
+<div class="filters">
+<input id="search" type="search" placeholder="Search kits, tags, descriptions…" aria-label="Search" />
+<select id="category" aria-label="Filter by category">
+<option value="">All categories</option>
+</select>
+</div>
+</div>
 </header>
-<main id="kit-list" class="grid"></main>
-<footer>
+
+
+<main>
+<section class="toolbar wrap">
+<div id="count" class="count">Loading…</div>
+<div class="legend" aria-hidden="true">
+<span class="badge ok">In stock</span>
+<span class="badge warn">Low</span>
+<span class="badge out">Out</span>
+</div>
+</section>
+
+
+<section id="kit-list" class="grid wrap" aria-live="polite"></section>
+</main>
+
+
+<!-- Modal -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+<div class="dialog">
+<button id="modal-close" class="icon-btn" aria-label="Close">×</button>
+<div class="dialog-body">
+<div class="dialog-left">
+<div class="thumb big" id="m-thumb"></div>
+</div>
+<div class="dialog-right">
+<h2 id="modal-title">Kit</h2>
+<p id="m-meta" class="muted"></p>
+<div id="m-badges" class="tags"></div>
+<p id="m-desc" class="desc"></p>
+<div class="actions">
+<button id="checkout-btn" class="btn primary">Checkout</button>
+<a id="open-page" class="btn ghost" href="#" target="_self">Open full page</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<footer class="site-footer wrap">
 <p>© Your Lab</p>
 </footer>
+
 
 <script type="module" src="./js/app.js"></script>
 </body>
 </html>
-
