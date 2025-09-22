@@ -1,1 +1,62 @@
-
+[
+  {
+    "kit_id": "KIT-00001",
+    "name": "Woodburning Kit",
+    "category": "woodworking",
+    "total_qty": 2,
+    "available_qty": 2,
+    "image_url": "",
+    "location": "Take and Create Stand",
+    "description": "This project will help you get more familiar with using the woodburner. You will learn some burning techniques, have the chance to practice with the woodburner, and finish with a completed art piece.",
+    "tags": "wood,art,crafts",
+    "active": true
+  },
+  {
+    "kit_id": "KIT-00002",
+    "name": "Vacuum Forming Pot",
+    "category": "fabrication",
+    "total_qty": 3,
+    "available_qty": 3,
+    "image_url": "",
+    "location": "Take and Create Stand",
+    "description": "Become familiarized with vacuum forming by creating a plastic plant pot with a customizable buck!",
+    "tags": "plastic,forming,pot",
+    "active": true
+  },
+  {
+    "kit_id": "KIT-00003",
+    "name": "Mancala Board",
+    "category": "dremel",
+    "total_qty": 2,
+    "available_qty": 2,
+    "image_url": "",
+    "location": "Take and Create Stand",
+    "description": "This project will help you get more familiar with using the Dremel...",
+    "tags": "dremel,game,wood",
+    "active": true
+  },
+  {
+    "kit_id": "KIT-00004",
+    "name": "Pencil Pouch",
+    "category": "sewing",
+    "total_qty": 4,
+    "available_qty": 4,
+    "image_url": "",
+    "location": "Take and Create Stand",
+    "description": "Learn basic setup and stitching on the sewing machine by creating your own pencil pouch.",
+    "tags": "sewing,fabric,crafts",
+    "active": true
+  },
+  {
+    "kit_id": "KIT-00005",
+    "name": "Leather Keychain",
+    "category": "leatherwork",
+    "total_qty": 3,
+    "available_qty": 3,
+    "image_url": "",
+    "location": "Take and Create Stand",
+    "description": "Leather crafting with a hole punch and rivet setter to create your own keychain.",
+    "tags": "leather,keychain,crafts",
+    "active": true
+  }
+]
