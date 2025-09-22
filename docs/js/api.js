@@ -1,18 +1,13 @@
-import { API_BASE, SHARED_KEY } from './config.js';
+import { API_BASE } from './config.js';
 
-export async function apiGet(route, params={}){
+
+export async function apiGet(route, params = {}) {
+if (!API_BASE) return { ok: false, error: 'API not configured' };
 const qs = new URLSearchParams({ route, ...params }).toString();
+try {
 const res = await fetch(`${API_BASE}?${qs}`);
 return res.json();
+} catch (e) {
+return { ok: false, error: e.message };
 }
-
-export async function apiPost(route, data={}){
-// Use simple form-encoded body (avoids CORS preflight)
-const body = new URLSearchParams({ route, ...data, ...(SHARED_KEY ? { key: SHARED_KEY } : {}) });
-const res = await fetch(API_BASE, {
-method: 'POST',
-headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-body
-});
-return res.json();
 }
