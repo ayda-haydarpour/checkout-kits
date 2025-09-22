@@ -1,1 +1,29 @@
+<!doctype html>
+</form>
+</section>
+
+<p id="msg" class="msg"></p>
+</div>
+</main>
+
+<script src="./js/qrcode.min.js"></script>
+<script type="module" src="./js/kit.js"></script>
+<script type="module">
+import { apiPost } from './js/api.js';
+const btn = document.querySelector('#waitlist-btn');
+const form = document.querySelector('#waitlist-form');
+function getId(){ const u = new URL(location.href); return u.searchParams.get('id'); }
+btn.addEventListener('click', async () => {
+const fd = new FormData(form);
+const res = await apiPost('waitlist', {
+kit_id: getId(),
+requester_name: fd.get('requester_name'),
+requester_email: fd.get('requester_email')
+});
+const msg = document.querySelector('#msg');
+msg.textContent = res.ok ? 'Added to waitlist! Check your email.' : (res.error||'Error');
+});
+</script>
+</body>
+</html>
 
