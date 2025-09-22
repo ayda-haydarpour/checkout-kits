@@ -8,7 +8,9 @@ const modal = document.querySelector('#modal');
 const modalClose = document.querySelector('#modal-close');
 const mThumb = document.querySelector('#m-thumb');
 const mTitle = document.querySelector('#modal-title');
-const mMeta = document.querySelector('#m-meta');
+const mCat = document.querySelector('#m-cat');
+const mLoc = document.querySelector('#m-loc');
+const mAvail = document.querySelector('#m-availability');
 const mBadges = document.querySelector('#m-badges');
 const mDesc = document.querySelector('#m-desc');
 const form = document.querySelector('#checkout-form');
@@ -41,8 +43,15 @@ function cardThumb(k){
   if (k.image_url) return `<div class="thumb"><img src="${k.image_url}" alt="${k.name}" onerror="this.parentElement.outerHTML='${placeholderFor(k.name).replace(/'/g,'&#39;')}'" /></div>`;
   return placeholderFor(k.name);
 }
+
+// === CARD MARKUP (with explicit labels) ===
 function card(k){
-  const tags = (k.tags||'').split(',').filter(Boolean).map(t=>`<span>${t.trim()}</span>`).join('');
+  const tags = (k.tags||'')
+    .split(',')
+    .filter(Boolean)
+    .map(t=>`<span>${t.trim()}</span>`)
+    .join('');
+
   return `
     <article class="card" data-id="${k.kit_id}" tabindex="0" role="button" aria-label="Open details for ${k.name}">
       ${cardThumb(k)}
@@ -51,11 +60,15 @@ function card(k){
           <h3 class="title">${k.name}</h3>
           ${availabilityBadge(k)}
         </div>
-        <p class="muted">${k.category||''} • ${k.location||''}</p>
-        <p class="muted">Available: <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
+
+        <p class="muted"><strong>Category:</strong> ${k.category || '—'}</p>
+        <p class="muted"><strong>Location:</strong> ${k.location || '—'}</p>
+        <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
+
         <div class="tags">${tags}</div>
       </div>
-    </article>`;
+    </article>
+  `;
 }
 
 // ---------- render list ----------
@@ -84,7 +97,9 @@ function openModalById(id){
   CURRENT = k;
   mThumb.innerHTML = k.image_url ? `<img src="${k.image_url}" alt="${k.name}">` : placeholderFor(k.name);
   mTitle.textContent = k.name;
-  mMeta.textContent = `${k.category||''} • ${k.location||''} • Available: ${availabilityFor(k)}/${k.total_qty}`;
+  mCat.textContent = k.category || '—';
+  mLoc.textContent = k.location || '—';
+  mAvail.textContent = `${availabilityFor(k)} / ${k.total_qty}`;
   mBadges.innerHTML = (k.tags||'').split(',').filter(Boolean).map(t=>`<span>${t.trim()}</span>`).join('');
   mDesc.textContent = k.description || '';
   btnCheckout.disabled = availabilityFor(k) <= 0;
