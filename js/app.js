@@ -39,12 +39,21 @@ function placeholderFor(name='?'){
   const letter = (name||'?').trim().charAt(0).toUpperCase();
   return `<div class="thumb"><div style="font-size:2.5rem">${letter}</div></div>`;
 }
-function cardThumb(k){
-  if (k.image_url) return `<div class="thumb"><img src="${k.image_url}" alt="${k.name}" onerror="this.parentElement.outerHTML='${placeholderFor(k.name).replace(/'/g,'&#39;')}'" /></div>`;
-  return placeholderFor(k.name);
+
+/* CLEAN image markup — avoids broken quotes and the '"/>' artifact */
+function cardThumb(k) {
+  if (k.image_url && k.image_url.trim()) {
+    return `
+      <div class="thumb">
+        <img src="${k.image_url}" alt="${k.name}" />
+      </div>
+    `;
+  }
+  // fallback: first letter
+  return `<div class="thumb"><div style="font-size:2.5rem">${(k.name||'?')[0].toUpperCase()}</div></div>`;
 }
 
-// === CARD MARKUP (with explicit labels) ===
+/* Card with explicit labels */
 function card(k){
   const tags = (k.tags||'')
     .split(',')
@@ -95,7 +104,11 @@ function populateCategory(){
 function openModalById(id){
   const k = KITS.find(x=>x.kit_id===id); if (!k) return;
   CURRENT = k;
-  mThumb.innerHTML = k.image_url ? `<img src="${k.image_url}" alt="${k.name}">` : placeholderFor(k.name);
+
+  mThumb.innerHTML = k.image_url && k.image_url.trim()
+    ? `<img src="${k.image_url}" alt="${k.name}">`
+    : `<div class="thumb"><div style="font-size:2.5rem">${(k.name||'?')[0].toUpperCase()}</div></div>`;
+
   mTitle.textContent = k.name;
   mCat.textContent = k.category || '—';
   mLoc.textContent = k.location || '—';
