@@ -45,35 +45,60 @@ body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Aria
 .count{font-weight:600;color:var(--muted)}
 .legend .badge{margin-left:.4rem}
 
-/* Cards */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;padding-bottom:2rem}
-.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:1rem;box-shadow:var(--shadow);overflow:hidden;transition:transform .12s ease}
+/* Grid + Cards */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:1rem;
+  padding-bottom:2rem;
+  align-items:stretch; /* ensure items stretch to same row height */
+}
+.card{
+  display:flex;
+  flex-direction:column;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:1rem;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  transition:transform .12s ease;
+  height:100%; /* equal-height cards */
+}
 .card:hover{transform:translateY(-2px)}
 
-/* Unified image sizing */
+/* Unified thumbnail with border */
 .thumb{
   width:100%;
-  aspect-ratio:4/3;          /* same size for all */
+  aspect-ratio:4/3;            /* same visual height for all */
   position:relative;
   overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   background:#fafafa;
-  color:var(--maroon);font-weight:700;font-size:1.25rem;
+  color:var(--maroon);
+  font-weight:700;
+  font-size:1.25rem;
+  border:1px solid var(--border);   /* border around image area */
+  border-radius:.75rem;             /* soft corners */
 }
 .thumb img{
   position:absolute; inset:0;
   width:100%; height:100%;
-  object-fit:cover;           /* fill without distortion */
+  object-fit:cover;                 /* cover without distortion */
 }
 
-/* Modal big preview uses same rules */
-.dialog-left .big{ aspect-ratio:4/3; position:relative; overflow:hidden; border-radius:.8rem; border:1px solid var(--border); background:#fafafa; }
-.dialog-left .big img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-
-.meta{padding:.85rem}
+.meta{
+  flex:1;                           /* fill remaining space for consistent layout */
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  padding:.85rem;
+}
 .title{margin:.1rem 0 .35rem;font-size:1rem;font-weight:700}
 .muted{color:var(--muted)}
 .row{display:flex;justify-content:space-between;gap:.5rem;align-items:center}
+
 .tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
 .tags span{font-size:.75rem;padding:.25rem .5rem;border-radius:.5rem;background:#f6f2f3;color:var(--maroon);border:1px solid #f0e6ea}
 .badge{font-size:.72rem;padding:.2rem .5rem;border-radius:.5rem;border:1px solid var(--border)}
@@ -90,6 +115,22 @@ body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Aria
 .modal.hidden{display:none}
 .dialog{position:relative;width:min(920px,96vw);background:#fff;border-radius:1rem;box-shadow:var(--shadow);border:1px solid var(--border)}
 .dialog-body{display:grid;grid-template-columns:360px 1fr;gap:1rem;padding:1rem}
+
+/* Modal preview uses same sizing + border */
+.dialog-left .big{
+  aspect-ratio:4/3;
+  position:relative;
+  overflow:hidden;
+  border-radius:.8rem;
+  border:1px solid var(--border);
+  background:#fafafa;
+}
+.dialog-left .big img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+}
+
 .dialog-right{padding:.25rem .5rem 1rem}
 .desc{white-space:pre-wrap;color:#333;margin-top:.5rem}
 .form-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:1rem}
