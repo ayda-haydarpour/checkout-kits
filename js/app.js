@@ -1,3 +1,4 @@
+// --- basic refs
 const listEl = document.querySelector('#kit-list');
 const searchEl = document.querySelector('#search');
 const suggestionsEl = document.querySelector('#suggestions');
@@ -17,7 +18,7 @@ const form = document.querySelector('#checkout-form');
 const btnCheckout = document.querySelector('#checkout-btn');
 const msg = document.querySelector('#checkout-msg');
 
-/* Thank you popup */
+// Thank-you popup
 const tyModal = document.querySelector('#thankyou');
 const tyMsg   = document.querySelector('#ty-msg');
 const tyOk    = document.querySelector('#ty-ok');
@@ -25,12 +26,12 @@ const tyOk    = document.querySelector('#ty-ok');
 let KITS = [];
 let CURRENT = null;
 
-/* --- localStorage “DB” for demo --- */
+// --- localStorage “DB” for demo ---
 const LS_LOANS = 'kiosk_loans_v1';
 function getLoans(){ try { return JSON.parse(localStorage.getItem(LS_LOANS)||'[]'); } catch{ return []; } }
 function setLoans(loans){ localStorage.setItem(LS_LOANS, JSON.stringify(loans)); }
 
-/* availability derived from base available_qty minus OPEN local loans */
+// --- availability
 function availabilityFor(k){
   const open = getLoans().filter(l => l.kit_id===k.kit_id && l.status==='OPEN').length;
   return Math.max(0, Number(k.available_qty||0) - open);
@@ -41,10 +42,8 @@ function availabilityBadge(k){
   if (a <= 1) return '<span class="badge warn">Low</span>';
   return '<span class="badge ok">In stock</span>';
 }
-function placeholderFor(name='?'){
-  const letter = (name||'?').trim().charAt(0).toUpperCase();
-  return `<div class="thumb"><div style="font-size:2.5rem">${letter}</div></div>`;
-}
+
+// --- thumbnails
 function cardThumb(k) {
   if (k.image_url && k.image_url.trim()) {
     return `
@@ -53,15 +52,13 @@ function cardThumb(k) {
       </div>
     `;
   }
-  return `<div class="thumb"><div style="font-size:2.5rem">${(k.name||'?')[0].toUpperCase()}</div></div>`;
+  const letter = (k.name||'?')[0].toUpperCase();
+  return `<div class="thumb"><div style="font-size:2.5rem">${letter}</div></div>`;
 }
 
-/* Card */
+// --- card
 function card(k){
-  const tags = (k.tags||'')
-    .split(',').filter(Boolean)
-    .map(t=>`<span>${t.trim()}</span>`).join('');
-
+  const tags = (k.tags||'').split(',').filter(Boolean).map(t=>`<span>${t.trim()}</span>`).join('');
   return `
     <article class="card" data-id="${k.kit_id}" tabindex="0" role="button" aria-label="Open details for ${k.name}">
       ${cardThumb(k)}
@@ -79,7 +76,7 @@ function card(k){
   `;
 }
 
-/* ---------- render list ---------- */
+// --- list render / category
 function renderList(){
   const q = (searchEl.value||'').toLowerCase().trim();
   const cat = (categoryEl.value||'').toLowerCase().trim();
@@ -92,14 +89,12 @@ function renderList(){
   countEl.textContent = `${filtered.length} kit${filtered.length===1?'':'s'}`;
   listEl.innerHTML = filtered.map(card).join('');
 }
-
-/* ---------- categories ---------- */
 function populateCategory(){
   const cats = Array.from(new Set(KITS.map(k=>String(k.category||'').toLowerCase()).filter(Boolean)));
   categoryEl.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
-/* Disable/enable checkout UI based on availability */
+// --- enable/disable checkout based on availability
 function updateCheckoutState(){
   if (!CURRENT) return;
   const avail = availabilityFor(CURRENT);
@@ -110,7 +105,7 @@ function updateCheckoutState(){
   msg.textContent = disabled ? 'Out of stock.' : '';
 }
 
-/* ---------- modal ---------- */
+// --- modal open/close
 function openModalById(id){
   const k = KITS.find(x=>x.kit_id===id); if (!k) return;
   CURRENT = k;
@@ -133,7 +128,7 @@ function openModalById(id){
 }
 function closeModal(){ modal.classList.add('hidden'); }
 
-/* ---------- suggestions (type-ahead) ---------- */
+// --- suggestions (unchanged)
 let activeIndex = -1;
 function buildSuggestions(query){
   const q = query.toLowerCase().trim();
@@ -143,11 +138,7 @@ function buildSuggestions(query){
   const catHits = Array.from(catSet).filter(c => c.startsWith(q)).slice(0,3);
 
   const kitHits = KITS
-    .filter(k => {
-      const nameHit = (k.name||'').toLowerCase().includes(q);
-      const tagHit = (k.tags||'').toLowerCase().includes(q);
-      return nameHit || tagHit;
-    })
+    .filter(k => (k.name||'').toLowerCase().includes(q) || (k.tags||'').toLowerCase().includes(q))
     .slice(0,7);
 
   const items = [
@@ -185,14 +176,12 @@ function pickSuggestion(el){
   }
 }
 
-/* ---------- wiring ---------- */
+// --- wiring
 function wireUI(){
-  // modal
   modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', e => { if (e.key==='Escape' && !modal.classList.contains('hidden')) closeModal(); });
 
-  // open modal from card
   listEl.addEventListener('click', e => {
     const card = e.target.closest('.card'); if (card) openModalById(card.getAttribute('data-id'));
   });
@@ -200,13 +189,11 @@ function wireUI(){
     if ((e.key==='Enter'||e.key===' ') && e.target.classList.contains('card')) { e.preventDefault(); openModalById(e.target.getAttribute('data-id')); }
   });
 
-  // filters + suggestions
   searchEl.addEventListener('input', () => { renderList(); buildSuggestions(searchEl.value); });
   searchEl.addEventListener('focus',   () => buildSuggestions(searchEl.value));
-  searchEl.addEventListener('blur',    () => setTimeout(hideSuggestions, 120)); // allow click
+  searchEl.addEventListener('blur',    () => setTimeout(hideSuggestions, 120));
   categoryEl.addEventListener('change', renderList);
 
-  // suggestions click + keyboard nav
   suggestionsEl.addEventListener('click', (e) => {
     const item = e.target.closest('.suggestion');
     if (item) pickSuggestion(item);
@@ -214,24 +201,22 @@ function wireUI(){
   searchEl.addEventListener('keydown', (e) => {
     const items = Array.from(suggestionsEl.querySelectorAll('.suggestion'));
     if (!items.length) return;
-
     if (e.key === 'ArrowDown'){ e.preventDefault(); activeIndex = (activeIndex + 1) % items.length; }
     else if (e.key === 'ArrowUp'){ e.preventDefault(); activeIndex = (activeIndex - 1 + items.length) % items.length; }
     else if (e.key === 'Enter'){ e.preventDefault(); if (activeIndex >= 0) pickSuggestion(items[activeIndex]); return; }
     else { return; }
-
     items.forEach((el,i)=>el.classList.toggle('active', i===activeIndex));
   });
 
   // thank-you popup close
   tyOk.addEventListener('click', () => tyModal.classList.add('hidden'));
 
-  // checkout (local demo)
+  // checkout
   form.addEventListener('submit', e => {
     e.preventDefault();
     if (!CURRENT) return;
 
-    // double-check lockout
+    // hard lockout
     if (availabilityFor(CURRENT) <= 0) { updateCheckoutState(); return; }
 
     const fd = new FormData(form);
@@ -254,20 +239,24 @@ function wireUI(){
     });
     setLoans(loans);
 
-    // Update UI availability and lockout if we just hit 0
+    // Update list + modal state
     renderList();
     updateCheckoutState();
 
-    // show thank-you popup
-    tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>. Please return the <b>box itself</b> after you’re done.`;
-    tyModal.classList.remove('hidden');
+    // Show thank-you popup (with fallback alert)
+    if (tyModal){
+      tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>. Please return the <b>box itself</b> after you’re done.`;
+      tyModal.classList.remove('hidden');
+    } else {
+      alert(`Thanks for checking out ${CURRENT.name}! Please return the box itself after you're done.`);
+    }
 
-    // close the detail modal underneath
+    // Close the detail modal underneath
     closeModal();
   });
 }
 
-/* ---------- load data (with fallback) ---------- */
+// --- data load
 async function load(){
   const SAMPLE = [
     { kit_id:'KIT-00001', name:'Woodburning Kit', category:'woodworking', total_qty:2, available_qty:2, image_url:'', location:'Take and Create Stand', description:'Learn burning techniques and finish with an art piece.', tags:'wood,art,crafts', active:true },
