@@ -17,15 +17,20 @@ const form = document.querySelector('#checkout-form');
 const btnCheckout = document.querySelector('#checkout-btn');
 const msg = document.querySelector('#checkout-msg');
 
+/* Thank you popup */
+const tyModal = document.querySelector('#thankyou');
+const tyMsg   = document.querySelector('#ty-msg');
+const tyOk    = document.querySelector('#ty-ok');
+
 let KITS = [];
 let CURRENT = null;
 
-// --- localStorage “DB” for demo ---
+/* --- localStorage “DB” for demo --- */
 const LS_LOANS = 'kiosk_loans_v1';
 function getLoans(){ try { return JSON.parse(localStorage.getItem(LS_LOANS)||'[]'); } catch{ return []; } }
 function setLoans(loans){ localStorage.setItem(LS_LOANS, JSON.stringify(loans)); }
 
-// availability derived from base available_qty minus OPEN local loans
+/* availability derived from base available_qty minus OPEN local loans */
 function availabilityFor(k){
   const open = getLoans().filter(l => l.kit_id===k.kit_id && l.status==='OPEN').length;
   return Math.max(0, Number(k.available_qty||0) - open);
@@ -40,8 +45,6 @@ function placeholderFor(name='?'){
   const letter = (name||'?').trim().charAt(0).toUpperCase();
   return `<div class="thumb"><div style="font-size:2.5rem">${letter}</div></div>`;
 }
-
-/* CLEAN image markup — avoids broken quotes and the '"/>' artifact */
 function cardThumb(k) {
   if (k.image_url && k.image_url.trim()) {
     return `
@@ -50,17 +53,14 @@ function cardThumb(k) {
       </div>
     `;
   }
-  // fallback: first letter
   return `<div class="thumb"><div style="font-size:2.5rem">${(k.name||'?')[0].toUpperCase()}</div></div>`;
 }
 
-/* Card with explicit labels and consistent structure */
+/* Card */
 function card(k){
   const tags = (k.tags||'')
-    .split(',')
-    .filter(Boolean)
-    .map(t=>`<span>${t.trim()}</span>`)
-    .join('');
+    .split(',').filter(Boolean)
+    .map(t=>`<span>${t.trim()}</span>`).join('');
 
   return `
     <article class="card" data-id="${k.kit_id}" tabindex="0" role="button" aria-label="Open details for ${k.name}">
@@ -70,11 +70,9 @@ function card(k){
           <h3 class="title">${k.name}</h3>
           ${availabilityBadge(k)}
         </div>
-
         <p class="muted"><strong>Category:</strong> ${k.category || '—'}</p>
         <p class="muted"><strong>Location:</strong> ${k.location || '—'}</p>
         <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
-
         <div class="tags">${tags}</div>
       </div>
     </article>
@@ -101,6 +99,17 @@ function populateCategory(){
   categoryEl.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
+/* Disable/enable checkout UI based on availability */
+function updateCheckoutState(){
+  if (!CURRENT) return;
+  const avail = availabilityFor(CURRENT);
+  mAvail.textContent = `${avail} / ${CURRENT.total_qty}`;
+  const disabled = avail <= 0;
+  btnCheckout.disabled = disabled;
+  form.querySelectorAll('input').forEach(i => i.disabled = disabled);
+  msg.textContent = disabled ? 'Out of stock.' : '';
+}
+
 /* ---------- modal ---------- */
 function openModalById(id){
   const k = KITS.find(x=>x.kit_id===id); if (!k) return;
@@ -113,13 +122,13 @@ function openModalById(id){
   mTitle.textContent = k.name;
   mCat.textContent = k.category || '—';
   mLoc.textContent = k.location || '—';
-  mAvail.textContent = `${availabilityFor(k)} / ${k.total_qty}`;
   mBadges.innerHTML = (k.tags||'').split(',').filter(Boolean).map(t=>`<span>${t.trim()}</span>`).join('');
   mDesc.textContent = k.description || '';
-  btnCheckout.disabled = availabilityFor(k) <= 0;
   form.reset();
   msg.textContent = '';
   modal.classList.remove('hidden');
+
+  updateCheckoutState();
   setTimeout(()=>modalClose.focus(),0);
 }
 function closeModal(){ modal.classList.add('hidden'); }
@@ -214,19 +223,24 @@ function wireUI(){
     items.forEach((el,i)=>el.classList.toggle('active', i===activeIndex));
   });
 
+  // thank-you popup close
+  tyOk.addEventListener('click', () => tyModal.classList.add('hidden'));
+
   // checkout (local demo)
   form.addEventListener('submit', e => {
     e.preventDefault();
     if (!CURRENT) return;
-    if (availabilityFor(CURRENT) <= 0) { msg.textContent = 'Out of stock.'; return; }
+
+    // double-check lockout
+    if (availabilityFor(CURRENT) <= 0) { updateCheckoutState(); return; }
 
     const fd = new FormData(form);
     const name = String(fd.get('name')||'').trim();
     const email = String(fd.get('email')||'').trim();
-    const days = Math.max(1, Number(fd.get('days')||7));
+    const daysDefault = 7;
 
     const now = Date.now();
-    const due = new Date(now + days*24*3600*1000);
+    const due = new Date(now + daysDefault*24*3600*1000);
 
     const loans = getLoans();
     loans.push({
@@ -240,9 +254,16 @@ function wireUI(){
     });
     setLoans(loans);
 
-    msg.textContent = `Checked out! Due ${due.toLocaleString()}`;
-    renderList(); // update availability badges/count
-    btnCheckout.disabled = availabilityFor(CURRENT) <= 0;
+    // Update UI availability and lockout if we just hit 0
+    renderList();
+    updateCheckoutState();
+
+    // show thank-you popup
+    tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>. Please return the <b>box itself</b> after you’re done.`;
+    tyModal.classList.remove('hidden');
+
+    // close the detail modal underneath
+    closeModal();
   });
 }
 
