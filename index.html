@@ -62,7 +62,6 @@
             <div class="form-row">
               <label>Name <input name="name" required /></label>
               <label>Email <input type="email" name="email" required /></label>
-              <!-- days hidden (default 7) -->
             </div>
             <button id="checkout-btn" class="btn primary" type="submit">Checkout</button>
             <span id="checkout-msg" class="msg" role="status" aria-live="polite"></span>
@@ -93,6 +92,7 @@
     <p>© Prototyping Studio</p>
   </footer>
 
-  <script type="module" src="./js/app.js"></script>
+  <!-- versioned to bust cache -->
+  <script type="module" src="./js/app.js?v=3"></script>
 </body>
 </html>
