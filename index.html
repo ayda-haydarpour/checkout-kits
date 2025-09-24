@@ -40,7 +40,7 @@
     <section id="kit-list" class="grid wrap" aria-live="polite"></section>
   </main>
 
-  <!-- Modal -->
+  <!-- Details / Checkout Modal -->
   <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="dialog">
       <button id="modal-close" class="icon-btn" aria-label="Close">×</button>
@@ -62,11 +62,28 @@
             <div class="form-row">
               <label>Name <input name="name" required /></label>
               <label>Email <input type="email" name="email" required /></label>
-            <!--  <label>Days <input type="number" name="days" min="1" value="7" required /></label> -->
+              <!-- days hidden (default 7) -->
             </div>
             <button id="checkout-btn" class="btn primary" type="submit">Checkout</button>
             <span id="checkout-msg" class="msg" role="status" aria-live="polite"></span>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thank You Popup -->
+  <div id="thankyou" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="ty-title">
+    <div class="dialog small">
+      <div class="dialog-inner">
+        <h2 id="ty-title">Thanks for checking out!</h2>
+        <p id="ty-msg" class="muted"></p>
+        <ul class="checklist">
+          <li>Please <b>take the contents</b> you need.</li>
+          <li>When you’re done, <b>return the box itself</b> to the studio.</li>
+        </ul>
+        <div class="actions">
+          <button id="ty-ok" class="btn primary">Got it</button>
         </div>
       </div>
     </div>
