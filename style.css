@@ -51,7 +51,7 @@ body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Aria
   grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
   gap:1rem;
   padding-bottom:2rem;
-  align-items:stretch; /* ensure items stretch to same row height */
+  align-items:stretch;
 }
 .card{
   display:flex;
@@ -62,37 +62,27 @@ body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Aria
   box-shadow:var(--shadow);
   overflow:hidden;
   transition:transform .12s ease;
-  height:100%; /* equal-height cards */
+  height:100%;
 }
 .card:hover{transform:translateY(-2px)}
 
 /* Unified thumbnail with border */
 .thumb{
   width:100%;
-  aspect-ratio:4/3;            /* same visual height for all */
+  aspect-ratio:4/3;
   position:relative;
   overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   background:#fafafa;
-  color:var(--maroon);
-  font-weight:700;
-  font-size:1.25rem;
-  border:1px solid var(--border);   /* border around image area */
-  border-radius:.75rem;             /* soft corners */
+  color:var(--maroon);font-weight:700;font-size:1.25rem;
+  border:1px solid var(--border);
+  border-radius:.75rem;
 }
-.thumb img{
-  position:absolute; inset:0;
-  width:100%; height:100%;
-  object-fit:cover;                 /* cover without distortion */
-}
+.thumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 
 .meta{
-  flex:1;                           /* fill remaining space for consistent layout */
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
+  flex:1;
+  display:flex; flex-direction:column; justify-content:flex-start;
   padding:.85rem;
 }
 .title{margin:.1rem 0 .35rem;font-size:1rem;font-weight:700}
@@ -114,30 +104,18 @@ body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Aria
 .modal{position:fixed;inset:0;background:rgba(17,24,39,.48);display:grid;place-items:center;padding:1rem}
 .modal.hidden{display:none}
 .dialog{position:relative;width:min(920px,96vw);background:#fff;border-radius:1rem;box-shadow:var(--shadow);border:1px solid var(--border)}
+.dialog.small{width:min(520px,94vw);} /* thank you popup */
 .dialog-body{display:grid;grid-template-columns:360px 1fr;gap:1rem;padding:1rem}
-
-/* Modal preview uses same sizing + border */
-.dialog-left .big{
-  aspect-ratio:4/3;
-  position:relative;
-  overflow:hidden;
-  border-radius:.8rem;
-  border:1px solid var(--border);
-  background:#fafafa;
-}
-.dialog-left .big img{
-  position:absolute; inset:0;
-  width:100%; height:100%;
-  object-fit:cover;
-}
-
 .dialog-right{padding:.25rem .5rem 1rem}
+.dialog-inner{padding:1rem}
+.checklist{margin:.5rem 0 0 1rem;color:#374151}
 .desc{white-space:pre-wrap;color:#333;margin-top:.5rem}
-.form-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:1rem}
+.form-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin-top:1rem}
 label{display:flex;flex-direction:column;gap:.35rem;font-size:.9rem}
 input{padding:.6rem .7rem;border:1px solid var(--border);border-radius:.6rem}
-.msg{margin-left:.75rem;color:#166534}
-.actions{display:flex;gap:.5rem;margin-top:1rem}
+input:disabled{background:#f5f5f5;color:#9ca3af;cursor:not-allowed}
+.msg{margin-left:.75rem;color:#991b1b} /* used for 'Out of stock.' */
+.actions{display:flex;gap:.5rem;margin-top:1rem;justify-content:flex-end}
 
 /* Footer + responsive */
 .site-footer{padding:1.25rem 0;border-top:1px solid var(--border);color:var(--muted)}
