@@ -1,4 +1,11 @@
-// --- basic refs
+// ====== CONFIG ======
+const SHEET_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/1lqo329RPwuBE9E39ImGlcL0d9zmXP8Clf_rgOAOMrGo/export?format=csv";
+
+// How long after checkout to re-pull the sheet (ms). Google Forms/Sheets usually update fast.
+const POST_CHECKOUT_REFRESH_MS = 2500;
+
+// ====== DOM REFS ======
 const listEl = document.querySelector('#kit-list');
 const searchEl = document.querySelector('#search');
 const suggestionsEl = document.querySelector('#suggestions');
@@ -23,19 +30,106 @@ const tyModal = document.querySelector('#thankyou');
 const tyMsg   = document.querySelector('#ty-msg');
 const tyOk    = document.querySelector('#ty-ok');
 
+// ====== APP STATE ======
 let KITS = [];
 let CURRENT = null;
+// Live, global “loans” array from the Google Sheet CSV.
+// Each entry: { timestamp, kit_id, name, email, kit_name }
+let LOANS_SHEET = [];
 
-// --- localStorage “DB” for demo ---
-const LS_LOANS = 'kiosk_loans_v1';
-function getLoans(){ try { return JSON.parse(localStorage.getItem(LS_LOANS)||'[]'); } catch{ return []; } }
-function setLoans(loans){ localStorage.setItem(LS_LOANS, JSON.stringify(loans)); }
+// ====== CSV PARSER (handles quoted commas) ======
+function parseCSV(text) {
+  const rows = [];
+  let i = 0, field = '', row = [], inQuotes = false;
 
-// --- availability
-function availabilityFor(k){
-  const open = getLoans().filter(l => l.kit_id===k.kit_id && l.status==='OPEN').length;
-  return Math.max(0, Number(k.available_qty||0) - open);
+  const pushField = () => { row.push(field); field = ''; };
+  const pushRow = () => { rows.push(row); row = []; };
+
+  while (i < text.length) {
+    const c = text[i];
+
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i+1] === '"') { field += '"'; i += 2; continue; } // escaped quote
+        inQuotes = false; i++; continue;
+      } else {
+        field += c; i++; continue;
+      }
+    } else {
+      if (c === '"') { inQuotes = true; i++; continue; }
+      if (c === ',') { pushField(); i++; continue; }
+      if (c === '\r') { i++; continue; }
+      if (c === '\n') { pushField(); pushRow(); i++; continue; }
+      field += c; i++; continue;
+    }
+  }
+  // last field/row
+  if (field.length || row.length) { pushField(); pushRow(); }
+  return rows;
 }
+
+// ====== SHEET FETCH ======
+async function fetchLoansFromSheet() {
+  const res = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch loans CSV');
+  const text = await res.text();
+  const rows = parseCSV(text);
+  if (!rows.length) return [];
+
+  const headers = rows[0].map(h => (h || '').trim().toLowerCase());
+  const idx = {
+    ts:     headers.indexOf('timestamp'),
+    kit_id: headers.indexOf('kit id'),
+    name:   headers.indexOf('name'),
+    email:  headers.indexOf('email'),
+    kit:    headers.indexOf('kit'),
+  };
+
+  // ignore header row
+  const out = [];
+  for (let r = 1; r < rows.length; r++) {
+    const cols = rows[r];
+    if (!cols || cols.length < 2) continue;
+    const kitId = (cols[idx.kit_id] || '').trim();
+    const kitNm = (cols[idx.kit] || '').trim();
+    const user  = (cols[idx.name] || '').trim();
+    const mail  = (cols[idx.email] || '').trim();
+    const ts    = (cols[idx.ts] || '').trim();
+
+    // Skip empty rows
+    if (!kitId && !kitNm && !user && !mail) continue;
+
+    out.push({
+      timestamp: ts,
+      kit_id: kitId,
+      kit_name: kitNm,
+      name: user,
+      email: mail,
+    });
+  }
+  return out;
+}
+
+async function refreshLoansFromSheet() {
+  try {
+    LOANS_SHEET = await fetchLoansFromSheet();
+  } catch (e) {
+    console.warn('Could not refresh loans from sheet:', e);
+    LOANS_SHEET = [];
+  }
+}
+
+// ====== AVAILABILITY (GLOBAL via SHEET) ======
+function loansCountForKit(kitId) {
+  return LOANS_SHEET.filter(l => String(l.kit_id) === String(kitId)).length;
+}
+
+function availabilityFor(k) {
+  const out = loansCountForKit(k.kit_id);
+  const total = Number(k.total_qty || 0);
+  return Math.max(0, total - out);
+}
+
 function availabilityBadge(k){
   const a = availabilityFor(k);
   if (a <= 0) return '<span class="badge out">Out</span>';
@@ -43,7 +137,7 @@ function availabilityBadge(k){
   return '<span class="badge ok">In stock</span>';
 }
 
-// --- thumbnails
+// ====== THUMBNAILS / CARDS ======
 function cardThumb(k) {
   if (k.image_url && k.image_url.trim()) {
     return `
@@ -56,7 +150,6 @@ function cardThumb(k) {
   return `<div class="thumb"><div style="font-size:2.5rem">${letter}</div></div>`;
 }
 
-// --- card
 function card(k){
   const tags = (k.tags||'').split(',').filter(Boolean).map(t=>`<span>${t.trim()}</span>`).join('');
   return `
@@ -76,7 +169,7 @@ function card(k){
   `;
 }
 
-// --- list render / category
+// ====== LIST RENDER / CATEGORY ======
 function renderList(){
   const q = (searchEl.value||'').toLowerCase().trim();
   const cat = (categoryEl.value||'').toLowerCase().trim();
@@ -89,12 +182,13 @@ function renderList(){
   countEl.textContent = `${filtered.length} kit${filtered.length===1?'':'s'}`;
   listEl.innerHTML = filtered.map(card).join('');
 }
+
 function populateCategory(){
   const cats = Array.from(new Set(KITS.map(k=>String(k.category||'').toLowerCase()).filter(Boolean)));
   categoryEl.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
-// --- enable/disable checkout based on availability
+// ====== CHECKOUT STATE ======
 function updateCheckoutState(){
   if (!CURRENT) return;
   const avail = availabilityFor(CURRENT);
@@ -105,7 +199,7 @@ function updateCheckoutState(){
   msg.textContent = disabled ? 'Out of stock.' : '';
 }
 
-// --- modal open/close
+// ====== MODAL OPEN/CLOSE ======
 function openModalById(id){
   const k = KITS.find(x=>x.kit_id===id); if (!k) return;
   CURRENT = k;
@@ -126,9 +220,10 @@ function openModalById(id){
   updateCheckoutState();
   setTimeout(()=>modalClose.focus(),0);
 }
+
 function closeModal(){ modal.classList.add('hidden'); }
 
-// --- suggestions (unchanged)
+// ====== SUGGESTIONS ======
 let activeIndex = -1;
 function buildSuggestions(query){
   const q = query.toLowerCase().trim();
@@ -156,11 +251,13 @@ function buildSuggestions(query){
   suggestionsEl.classList.add('show');
   activeIndex = -1;
 }
+
 function hideSuggestions(){
   suggestionsEl.classList.remove('show');
   suggestionsEl.innerHTML = '';
   activeIndex = -1;
 }
+
 function pickSuggestion(el){
   const type = el.getAttribute('data-type');
   const val = el.getAttribute('data-value');
@@ -176,7 +273,7 @@ function pickSuggestion(el){
   }
 }
 
-// --- wiring
+// ====== WIRING ======
 function wireUI(){
   modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
@@ -212,56 +309,34 @@ function wireUI(){
   tyOk.addEventListener('click', () => tyModal.classList.add('hidden'));
 
   // checkout
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!CURRENT) return;
 
-    // hard lockout if out of stock
+    // hard lockout if out of stock (based on SHEET)
     if (availabilityFor(CURRENT) <= 0) { updateCheckoutState(); return; }
 
     const fd = new FormData(form);
     const name = String(fd.get('name')||'').trim();
     const email = String(fd.get('email')||'').trim();
-    const daysDefault = 7;
-
     if (!name || !email) return;
 
-    // prevent rapid double-submits
+    // Prevent rapid double-submits
     btnCheckout.disabled = true;
     setTimeout(()=>{ btnCheckout.disabled = false; }, 1200);
 
-    const now = Date.now();
-    const due = new Date(now + daysDefault*24*3600*1000);
-
-    // write to localStorage
-    const loans = getLoans();
-    loans.push({
-      id: `LOAN-${String(loans.length+1).padStart(5,'0')}`,
-      kit_id: CURRENT.kit_id,
-      borrower_name: name,
-      borrower_email: email,
-      start_ts: now,
-      due_ts: due.toISOString(),
-      status: 'OPEN'
-    });
-    setLoans(loans);
-
-    // 🔒 also submit to Google Form invisibly (Sheet logger)
+    // 🔒 Submit to Google Form invisibly (this is what logs to the Sheet)
     try {
-      document.querySelector('#gf_kit_id').value   = CURRENT.kit_id;
-      document.querySelector('#gf_kit_name').value = CURRENT.name;
+      document.querySelector('#gf_kit_id').value     = CURRENT.kit_id;
+      document.querySelector('#gf_kit_name').value   = CURRENT.name;
       document.querySelector('#gf_user_name').value  = name;
       document.querySelector('#gf_user_email').value = email;
       document.querySelector('#gform').submit();
-    } catch(_) {
-      // ignore logging errors; UI still succeeds
+    } catch (_) {
+      // ignore logging errors; UI still proceeds
     }
 
-    // refresh list + modal state
-    renderList();
-    updateCheckoutState();
-
-    // thank-you popup
+    // UI feedback
     if (tyModal){
       tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>. Please return the <b>box itself</b> after you’re done.`;
       tyModal.classList.remove('hidden');
@@ -269,35 +344,47 @@ function wireUI(){
       alert(`Thanks for checking out ${CURRENT.name}! Please return the box itself after you're done.`);
     }
 
-    // close detail modal underneath
+    // Close details underneath
     closeModal();
+
+    // ⟳ After a short delay, re-fetch the sheet so availability updates globally
+    setTimeout(async () => {
+      await refreshLoansFromSheet();
+      renderList();
+      // If user re-opened a modal quickly, update those numbers too
+      if (!modal.classList.contains('hidden')) updateCheckoutState();
+    }, POST_CHECKOUT_REFRESH_MS);
   });
 }
 
-// --- data load
-async function load(){
+// ====== DATA LOAD ======
+async function loadKits() {
+  // Try your ./data/kits.json first; fall back to SAMPLE
   const SAMPLE = [
-    { kit_id:'KIT-00001', name:'Woodburning Kit', category:'woodworking', total_qty:2, available_qty:2, image_url:'', location:'Take and Create Stand', description:'Learn burning techniques and finish with an art piece.', tags:'wood,art,crafts', active:true },
-    { kit_id:'KIT-00002', name:'Vacuum Forming Pot', category:'fabrication', total_qty:3, available_qty:3, image_url:'', location:'Take and Create Stand', description:'Form a plastic plant pot with a custom buck.', tags:'plastic,forming,pot', active:true },
-    { kit_id:'KIT-00003', name:'Mancala Board', category:'dremel', total_qty:2, available_qty:2, image_url:'', location:'Take and Create Stand', description:'Use the Dremel to finish a wooden mancala board.', tags:'dremel,game,wood', active:true },
-    { kit_id:'KIT-00004', name:'Pencil Pouch', category:'sewing', total_qty:4, available_qty:4, image_url:'', location:'Take and Create Stand', description:'Learn basic setup and stitching on the sewing machine by making your own pencil pouch.', tags:'sewing,fabric,crafts', active:true },
-    { kit_id:'KIT-00005', name:'Leather Keychain', category:'leatherwork', total_qty:3, available_qty:3, image_url:'', location:'Take and Create Stand', description:'Practice leather crafting using a hole punch and rivet setter to create a keychain.', tags:'leather,keychain,crafts', active:true }
+    { kit_id:'KIT-00001', name:'Woodburning Kit', category:'woodworking', total_qty:2, image_url:'', location:'Take and Create Stand', description:'Learn burning techniques and finish with an art piece.', tags:'wood,art,crafts', active:true },
+    { kit_id:'KIT-00002', name:'Vacuum Forming Pot', category:'fabrication', total_qty:3, image_url:'', location:'Take and Create Stand', description:'Form a plastic plant pot with a custom buck.', tags:'plastic,forming,pot', active:true },
+    { kit_id:'KIT-00003', name:'Mancala Board', category:'dremel', total_qty:2, image_url:'', location:'Take and Create Stand', description:'Use the Dremel to finish a wooden mancala board.', tags:'dremel,game,wood', active:true },
+    { kit_id:'KIT-00004', name:'Pencil Pouch', category:'sewing', total_qty:4, image_url:'', location:'Take and Create Stand', description:'Learn basic setup and stitching on the sewing machine by making a pencil pouch.', tags:'sewing,fabric,crafts', active:true },
+    { kit_id:'KIT-00005', name:'Leather Keychain', category:'leatherwork', total_qty:3, image_url:'', location:'Take and Create Stand', description:'Practice leather crafting with a hole punch and rivet setter to create a keychain.', tags:'leather,keychain,crafts', active:true }
   ];
   try {
     const res = await fetch('./data/kits.json', { cache:'no-store' });
     if (!res.ok) throw new Error('kits.json not found');
     const data = await res.json();
-    KITS = data.map(k => ({ ...k, total_qty:+k.total_qty||0, available_qty:+k.available_qty||0 }));
+    KITS = data.map(k => ({ ...k, total_qty:+k.total_qty||0 }));
   } catch {
     KITS = SAMPLE;
   }
-  populateCategory();
-  renderList();
 }
 
-function wireStartup() {
+// ====== STARTUP ======
+async function wireStartup() {
   wireUI();
-  load();
+  await loadKits();
+  populateCategory();
+  // initial loans fetch from sheet, then render with live availability
+  await refreshLoansFromSheet();
+  renderList();
 }
 
 wireStartup();
