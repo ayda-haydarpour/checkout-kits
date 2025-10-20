@@ -216,7 +216,7 @@ function wireUI(){
     e.preventDefault();
     if (!CURRENT) return;
 
-    // hard lockout
+    // hard lockout if out of stock
     if (availabilityFor(CURRENT) <= 0) { updateCheckoutState(); return; }
 
     const fd = new FormData(form);
@@ -224,9 +224,16 @@ function wireUI(){
     const email = String(fd.get('email')||'').trim();
     const daysDefault = 7;
 
+    if (!name || !email) return;
+
+    // prevent rapid double-submits
+    btnCheckout.disabled = true;
+    setTimeout(()=>{ btnCheckout.disabled = false; }, 1200);
+
     const now = Date.now();
     const due = new Date(now + daysDefault*24*3600*1000);
 
+    // write to localStorage
     const loans = getLoans();
     loans.push({
       id: `LOAN-${String(loans.length+1).padStart(5,'0')}`,
@@ -239,11 +246,22 @@ function wireUI(){
     });
     setLoans(loans);
 
-    // Update list + modal state
+    // 🔒 also submit to Google Form invisibly (Sheet logger)
+    try {
+      document.querySelector('#gf_kit_id').value   = CURRENT.kit_id;
+      document.querySelector('#gf_kit_name').value = CURRENT.name;
+      document.querySelector('#gf_user_name').value  = name;
+      document.querySelector('#gf_user_email').value = email;
+      document.querySelector('#gform').submit();
+    } catch(_) {
+      // ignore logging errors; UI still succeeds
+    }
+
+    // refresh list + modal state
     renderList();
     updateCheckoutState();
 
-    // Show thank-you popup (with fallback alert)
+    // thank-you popup
     if (tyModal){
       tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>. Please return the <b>box itself</b> after you’re done.`;
       tyModal.classList.remove('hidden');
@@ -251,7 +269,7 @@ function wireUI(){
       alert(`Thanks for checking out ${CURRENT.name}! Please return the box itself after you're done.`);
     }
 
-    // Close the detail modal underneath
+    // close detail modal underneath
     closeModal();
   });
 }
@@ -262,8 +280,8 @@ async function load(){
     { kit_id:'KIT-00001', name:'Woodburning Kit', category:'woodworking', total_qty:2, available_qty:2, image_url:'', location:'Take and Create Stand', description:'Learn burning techniques and finish with an art piece.', tags:'wood,art,crafts', active:true },
     { kit_id:'KIT-00002', name:'Vacuum Forming Pot', category:'fabrication', total_qty:3, available_qty:3, image_url:'', location:'Take and Create Stand', description:'Form a plastic plant pot with a custom buck.', tags:'plastic,forming,pot', active:true },
     { kit_id:'KIT-00003', name:'Mancala Board', category:'dremel', total_qty:2, available_qty:2, image_url:'', location:'Take and Create Stand', description:'Use the Dremel to finish a wooden mancala board.', tags:'dremel,game,wood', active:true },
-    { kit_id:'KIT-00004', name:'Pencil Pouch', category:'sewing', total_qty:4, available_qty:4, image_url:'', location:'Take and Create Stand', description:'Learn sewing basics by making a pencil pouch.', tags:'sewing,fabric,crafts', active:true },
-    { kit_id:'KIT-00005', name:'Leather Keychain', category:'leatherwork', total_qty:3, available_qty:3, image_url:'', location:'Take and Create Stand', description:'Punch, rivet, and craft a leather keychain.', tags:'leather,keychain,crafts', active:true }
+    { kit_id:'KIT-00004', name:'Pencil Pouch', category:'sewing', total_qty:4, available_qty:4, image_url:'', location:'Take and Create Stand', description:'Learn basic setup and stitching on the sewing machine by making your own pencil pouch.', tags:'sewing,fabric,crafts', active:true },
+    { kit_id:'KIT-00005', name:'Leather Keychain', category:'leatherwork', total_qty:3, available_qty:3, image_url:'', location:'Take and Create Stand', description:'Practice leather crafting using a hole punch and rivet setter to create a keychain.', tags:'leather,keychain,crafts', active:true }
   ];
   try {
     const res = await fetch('./data/kits.json', { cache:'no-store' });
@@ -277,5 +295,9 @@ async function load(){
   renderList();
 }
 
-wireUI();
-load();
+function wireStartup() {
+  wireUI();
+  load();
+}
+
+wireStartup();
