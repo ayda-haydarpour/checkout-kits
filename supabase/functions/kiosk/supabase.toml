@@ -1,3 +1,0 @@
-[functions.kiosk]
-verify_jwt = false  # public access; DB still protected by RLS + service role here
-
