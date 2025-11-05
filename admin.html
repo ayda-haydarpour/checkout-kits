@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,43 +6,45 @@
   <title>Admin Panel – Equipment Kiosk</title>
   <link rel="stylesheet" href="./style.css" />
   <style>
-    body { background:#fafafa; padding:2rem; font-family:sans-serif; }
-    .admin-container { max-width:600px; margin:auto; background:#fff; padding:1.5rem; border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,.1); }
-    input, select, textarea { width:100%; padding:.6rem; margin-bottom:1rem; border:1px solid #ddd; border-radius:.5rem; }
-    button { background:#630031; color:white; border:none; padding:.7rem 1rem; border-radius:.5rem; cursor:pointer; }
+    body { background:#fafafa; font-family:system-ui,sans-serif; padding:2rem; }
+    .admin-container { max-width:700px; margin:auto; background:#fff; padding:1.5rem; border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+    input,textarea { width:100%; padding:.6rem; margin-bottom:.8rem; border:1px solid #ccc; border-radius:.5rem; }
+    button { background:#630031; color:#fff; border:none; padding:.7rem 1.1rem; border-radius:.5rem; cursor:pointer; }
     button:hover { background:#4a0025; }
-    #kit-list { margin-top:1rem; }
-    #kit-list article { border:1px solid #eee; padding:.75rem; border-radius:.5rem; margin-bottom:.5rem; background:#fff; }
+    .hidden { display:none; }
+    #kit-list article { border:1px solid #eee; border-radius:.5rem; padding:.6rem; margin:.4rem 0; }
   </style>
 </head>
 <body>
   <div class="admin-container">
     <h1>Admin Panel</h1>
-    <p id="login-section">
-      <strong>Admin Login:</strong>
+
+    <div id="login-section">
       <input id="admin-pass" type="password" placeholder="Enter admin password" />
       <button id="login-btn">Login</button>
-    </p>
+    </div>
 
     <div id="panel" class="hidden">
-      <h2>Add / Edit Kits</h2>
+      <button id="logout-btn" style="float:right;">Logout</button>
+      <h2>Add / Update Kit</h2>
       <form id="add-kit-form">
-        <input name="kit_id" placeholder="Kit ID (e.g. KIT-00006)" required />
+        <input name="kit_id" placeholder="Kit ID (blank for new)" />
         <input name="name" placeholder="Kit Name" required />
         <input name="category" placeholder="Category" />
         <input name="total_qty" type="number" placeholder="Total Quantity" required />
         <input name="location" placeholder="Location" />
-        <input name="tags" placeholder="Tags (comma-separated)" />
+        <input name="tags" placeholder="Tags" />
         <textarea name="description" placeholder="Description"></textarea>
-        <button type="submit">Add / Update Kit</button>
+        <label><input type="checkbox" name="active" checked /> Active</label>
+        <button type="submit">Save Kit</button>
       </form>
 
       <h2>Current Kits</h2>
       <button id="refresh-btn">Refresh List</button>
-      <section id="kit-list"></section>
+      <div id="kit-list"></div>
     </div>
   </div>
 
-  <script type="module" src="./js/admin.js?v=1"></script>
+  <script type="module" src="./js/admin.js"></script>
 </body>
 </html>
