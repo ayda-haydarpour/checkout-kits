@@ -1,1 +1,49 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel – Equipment Kiosk</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    body { background:#fafafa; padding:2rem; font-family:sans-serif; }
+    .admin-container { max-width:600px; margin:auto; background:#fff; padding:1.5rem; border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+    input, select, textarea { width:100%; padding:.6rem; margin-bottom:1rem; border:1px solid #ddd; border-radius:.5rem; }
+    button { background:#630031; color:white; border:none; padding:.7rem 1rem; border-radius:.5rem; cursor:pointer; }
+    button:hover { background:#4a0025; }
+    #kit-list { margin-top:1rem; }
+    #kit-list article { border:1px solid #eee; padding:.75rem; border-radius:.5rem; margin-bottom:.5rem; background:#fff; }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <h1>Admin Panel</h1>
+    <p id="login-section">
+      <strong>Admin Login:</strong>
+      <input id="admin-pass" type="password" placeholder="Enter admin password" />
+      <button id="login-btn">Login</button>
+    </p>
+
+    <div id="panel" class="hidden">
+      <h2>Add / Edit Kits</h2>
+      <form id="add-kit-form">
+        <input name="kit_id" placeholder="Kit ID (e.g. KIT-00006)" required />
+        <input name="name" placeholder="Kit Name" required />
+        <input name="category" placeholder="Category" />
+        <input name="total_qty" type="number" placeholder="Total Quantity" required />
+        <input name="location" placeholder="Location" />
+        <input name="tags" placeholder="Tags (comma-separated)" />
+        <textarea name="description" placeholder="Description"></textarea>
+        <button type="submit">Add / Update Kit</button>
+      </form>
+
+      <h2>Current Kits</h2>
+      <button id="refresh-btn">Refresh List</button>
+      <section id="kit-list"></section>
+    </div>
+  </div>
+
+  <script type="module" src="./js/admin.js?v=1"></script>
+</body>
+</html>
