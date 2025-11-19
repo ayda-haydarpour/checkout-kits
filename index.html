@@ -8,6 +8,7 @@
 </head>
 
 <body>
+  <!-- HEADER -->
   <header class="site-header">
     <div class="wrap">
       <div class="brand">
@@ -28,6 +29,7 @@
     </div>
   </header>
 
+  <!-- MAIN LIST -->
   <main>
     <section class="toolbar wrap">
       <div id="count" class="count">Loading…</div>
@@ -41,58 +43,62 @@
     <section id="kit-list" class="grid wrap"></section>
   </main>
 
-  <!-- DETAILS MODAL -->
+  <!-- MODAL -->
   <div id="modal" class="modal hidden">
     <div class="dialog">
       <button id="modal-close" class="icon-btn">×</button>
 
       <div class="dialog-body">
-        <div class="dialog-left">
-          <div class="thumb big" id="m-thumb"></div>
+
+        <!-- ⭐ IMAGE + QR CODE SIDE-BY-SIDE -->
+        <div class="top-row">
+          <div class="modal-image" id="m-thumb"></div>
+          <div class="modal-qr" id="m-qr"></div>
         </div>
 
-        <div class="dialog-right">
+        <!-- ⭐ FULL WIDTH INFORMATION -->
+        <div class="modal-info">
           <h2 id="modal-title">Kit</h2>
 
-          <p><strong>Category:</strong> <span id="m-cat"></span></p>
-          <p><strong>Location:</strong> <span id="m-loc"></span></p>
-          <p><strong>Available:</strong> <span id="m-availability"></span></p>
+          <p class="muted"><strong>Category:</strong> <span id="m-cat"></span></p>
+          <p class="muted"><strong>Location:</strong> <span id="m-loc"></span></p>
+          <p class="muted"><strong>Available:</strong> <span id="m-availability"></span></p>
 
           <div id="m-badges" class="tags"></div>
           <p id="m-desc" class="desc"></p>
 
-          <!-- ⭐ QR CODE HERE ⭐ -->
-          <div id="m-qr" class="qr-wrap"></div>
-
+          <!-- FORM -->
           <form id="checkout-form" class="form">
             <div class="form-row">
               <label>Name <input name="name" required /></label>
               <label>Email <input type="email" name="email" required /></label>
             </div>
-            <button id="checkout-btn" class="btn primary">Checkout</button>
+
+            <button id="checkout-btn" class="btn primary" type="submit">Checkout</button>
             <span id="checkout-msg" class="msg"></span>
           </form>
         </div>
-      </div>
 
+      </div>
     </div>
   </div>
 
-  <!-- THANK YOU -->
+  <!-- THANK YOU POPUP -->
   <div id="thankyou" class="modal hidden">
     <div class="dialog small">
       <div class="dialog-inner">
-        <h2>Thanks for checking out!</h2>
+        <h2 id="ty-title">Thanks for checking out!</h2>
         <p id="ty-msg" class="muted"></p>
         <ul class="checklist">
-          <li>Take the contents you need.</li>
-          <li>Return the box afterward.</li>
+          <li>Please <b>take the contents</b> you need.</li>
+          <li>When you’re done, <b>return the box itself</b> to the studio.</li>
         </ul>
-        <button id="ty-ok" class="btn primary">Got it</button>
+        <div class="actions"><button id="ty-ok" class="btn primary">Got it</button></div>
       </div>
     </div>
   </div>
 
+  <!-- GOOGLE FORM SUBMISSION (HIDDEN) -->
   <iframe name="gform_iframe" style="display:none;"></iframe>
 
   <form id="gform"
@@ -106,6 +112,8 @@
     <input name="entry.767119339" id="gf_kit_name" />
   </form>
 
-  <script type="module" src="./js/app.js?v=10"></script>
+  <!-- APP -->
+  <script type="module" src="./js/app.js?v=5"></script>
+
 </body>
 </html>
