@@ -6,6 +6,7 @@
   <title>Equipment Kiosk</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
+
 <body>
   <header class="site-header">
     <div class="wrap">
@@ -17,7 +18,7 @@
       <div class="filters">
         <div class="search-wrap">
           <input id="search" type="search" placeholder="Search kits, tags, categories…" aria-label="Search" autocomplete="off" />
-          <div id="suggestions" class="suggestions" role="listbox" aria-label="Suggestions"></div>
+          <div id="suggestions" class="suggestions" role="listbox"></div>
         </div>
 
         <select id="category" aria-label="Filter by category">
@@ -30,7 +31,7 @@
   <main>
     <section class="toolbar wrap">
       <div id="count" class="count">Loading…</div>
-      <div class="legend" aria-hidden="true">
+      <div class="legend">
         <span class="badge ok">In stock</span>
         <span class="badge warn">Low</span>
         <span class="badge out">Out</span>
@@ -40,23 +41,28 @@
     <section id="kit-list" class="grid wrap" aria-live="polite"></section>
   </main>
 
-  <!-- Details / Checkout Modal -->
+  <!-- DETAILS MODAL -->
   <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="dialog">
       <button id="modal-close" class="icon-btn" aria-label="Close">×</button>
+
       <div class="dialog-body">
         <div class="dialog-left">
           <div class="thumb big" id="m-thumb"></div>
         </div>
+
         <div class="dialog-right">
           <h2 id="modal-title">Kit</h2>
 
-          <p class="muted"><strong>Category:</strong> <span id="m-cat">—</span></p>
-          <p class="muted"><strong>Location:</strong> <span id="m-loc">—</span></p>
-          <p class="muted"><strong>Available:</strong> <span id="m-availability">—</span></p>
+          <p class="muted"><strong>Category:</strong> <span id="m-cat"></span></p>
+          <p class="muted"><strong>Location:</strong> <span id="m-loc"></span></p>
+          <p class="muted"><strong>Available:</strong> <span id="m-availability"></span></p>
 
           <div id="m-badges" class="tags"></div>
           <p id="m-desc" class="desc"></p>
+
+          <!-- ⭐ QR CODE HERE ⭐ -->
+          <div id="m-qr" class="qr-wrap"></div>
 
           <form id="checkout-form" class="form">
             <div class="form-row">
@@ -64,22 +70,23 @@
               <label>Email <input type="email" name="email" required /></label>
             </div>
             <button id="checkout-btn" class="btn primary" type="submit">Checkout</button>
-            <span id="checkout-msg" class="msg" role="status" aria-live="polite"></span>
+            <span id="checkout-msg" class="msg"></span>
           </form>
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- Thank You Popup -->
-  <div id="thankyou" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="ty-title">
+  <!-- THANK YOU POPUP -->
+  <div id="thankyou" class="modal hidden">
     <div class="dialog small">
       <div class="dialog-inner">
         <h2 id="ty-title">Thanks for checking out!</h2>
         <p id="ty-msg" class="muted"></p>
         <ul class="checklist">
           <li>Please <b>take the contents</b> you need.</li>
-          <li>When you’re done, <b>return the box itself</b> to the studio.</li>
+          <li>Return the <b>box</b> when done.</li>
         </ul>
         <div class="actions">
           <button id="ty-ok" class="btn primary">Got it</button>
@@ -88,28 +95,21 @@
     </div>
   </div>
 
-  <footer class="site-footer wrap">
-    <p>© Prototyping Studio</p>
-  </footer>
-
-  <!-- 🔒 Hidden Google Form submission bridge (do not remove) -->
+  <!-- HIDDEN GOOGLE FORM -->
   <iframe name="gform_iframe" style="display:none;"></iframe>
+
   <form id="gform"
         action="https://docs.google.com/forms/d/e/1FAIpQLSdvJma4wjIwnlLeoAS-OKTKHQIyRMHO_zXjUZ_m2z73UTtZpA/formResponse"
         method="POST"
         target="gform_iframe"
         style="display:none;">
-    <!-- Kit ID -->
     <input name="entry.1828362597" id="gf_kit_id" />
-    <!-- User Name -->
     <input name="entry.2133882029" id="gf_user_name" />
-    <!-- User Email -->
     <input name="entry.778756732" id="gf_user_email" />
-    <!-- Kit Name -->
     <input name="entry.767119339" id="gf_kit_name" />
   </form>
 
-  <!-- versioned to bust cache -->
-  <script type="module" src="./js/app.js?v=4"></script>
+  <script type="module" src="./js/app.js?v=5"></script>
+
 </body>
 </html>
