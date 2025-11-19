@@ -1,114 +1,333 @@
-// =====================
-// DOM ELEMENTS
-// =====================
+// ====== CONFIG ======
+const SHEET_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/1lqo329RPwuBE9E39ImGlcL0d9zmXP8Clf_rgOAOMrGo/export?format=csv";
+
+// How long after checkout to re-pull the sheet (ms)
+const POST_CHECKOUT_REFRESH_MS = 2500;
+
+// ====== DOM REFS ======
 const listEl = document.querySelector('#kit-list');
+const searchEl = document.querySelector('#search');
+const suggestionsEl = document.querySelector('#suggestions');
 const categoryEl = document.querySelector('#category');
 const countEl = document.querySelector('#count');
 
 const modal = document.querySelector('#modal');
 const modalClose = document.querySelector('#modal-close');
+
 const mThumb = document.querySelector('#m-thumb');
+const mQR = document.querySelector('#m-qr');
 const mTitle = document.querySelector('#modal-title');
 const mCat = document.querySelector('#m-cat');
 const mLoc = document.querySelector('#m-loc');
 const mAvail = document.querySelector('#m-availability');
 const mBadges = document.querySelector('#m-badges');
 const mDesc = document.querySelector('#m-desc');
-const mQR = document.querySelector('#m-qr');
 
+const form = document.querySelector('#checkout-form');
+const btnCheckout = document.querySelector('#checkout-btn');
+const msg = document.querySelector('#checkout-msg');
+
+// Thank-you popup
+const tyModal = document.querySelector('#thankyou');
+const tyMsg   = document.querySelector('#ty-msg');
+const tyOk    = document.querySelector('#ty-ok');
+
+// ====== APP STATE ======
 let KITS = [];
 let CURRENT = null;
+let LOANS_SHEET = [];
 
-// =====================
-// LOAD KITS.JSON
-// =====================
-async function loadKits() {
-  const res = await fetch('./data/kits.json', { cache: "no-store" });
-  KITS = await res.json();
+// ====== CSV PARSER ======
+function parseCSV(text) {
+  const rows = [];
+  let i = 0, field = '', row = [], inQuotes = false;
+
+  const pushField = () => { row.push(field); field = ''; };
+  const pushRow = () => { rows.push(row); row = []; };
+
+  while (i < text.length) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    }
+
+    if (c === '"') { inQuotes = true; i++; continue; }
+    if (c === ',') { pushField(); i++; continue; }
+    if (c === '\n') { pushField(); pushRow(); i++; continue; }
+    if (c === '\r') { i++; continue; }
+
+    field += c;
+    i++;
+  }
+
+  if (field.length || row.length) { pushField(); pushRow(); }
+  return rows;
 }
 
-// =====================
-// CARD RENDER
-// =====================
+// ====== SHEET FETCH ======
+async function fetchLoansFromSheet() {
+  const res = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch CSV');
+  const text = await res.text();
+  const rows = parseCSV(text);
+
+  if (!rows.length) return [];
+
+  const headers = rows[0].map(h => (h || '').trim().toLowerCase());
+  const idx = {
+    ts: headers.indexOf('timestamp'),
+    kit_id: headers.indexOf('kit id'),
+    name: headers.indexOf('name'),
+    email: headers.indexOf('email'),
+    kit: headers.indexOf('kit'),
+  };
+
+  const out = [];
+  for (let r = 1; r < rows.length; r++) {
+    const cols = rows[r];
+    if (!cols || cols.length < 2) continue;
+
+    const kitId = (cols[idx.kit_id] || '').trim();
+    const kitNm = (cols[idx.kit] || '').trim();
+    const user  = (cols[idx.name] || '').trim();
+    const mail  = (cols[idx.email] || '').trim();
+    const ts    = (cols[idx.ts] || '').trim();
+
+    if (!kitId && !user && !mail) continue;
+
+    out.push({ timestamp: ts, kit_id: kitId, kit_name: kitNm, name: user, email: mail });
+  }
+
+  return out;
+}
+
+async function refreshLoansFromSheet() {
+  try {
+    LOANS_SHEET = await fetchLoansFromSheet();
+  } catch (e) {
+    console.warn("Could not refresh sheet:", e);
+    LOANS_SHEET = [];
+  }
+}
+
+// ====== AVAILABILITY ======
+function loansCountForKit(id) {
+  return LOANS_SHEET.filter(l => String(l.kit_id) === String(id)).length;
+}
+function availabilityFor(k) {
+  return Math.max(0, Number(k.total_qty) - loansCountForKit(k.kit_id));
+}
+function availabilityBadge(k) {
+  const a = availabilityFor(k);
+  if (a <= 0) return `<span class="badge out">Out</span>`;
+  if (a <= 1) return `<span class="badge warn">Low</span>`;
+  return `<span class="badge ok">In stock</span>`;
+}
+
+// ====== CARDS ======
+function cardThumb(k) {
+  if (k.image_url) {
+    return `<div class="thumb"><img src="${k.image_url}" alt="${k.name}"></div>`;
+  }
+  const letter = (k.name || '?')[0].toUpperCase();
+  return `<div class="thumb">${letter}</div>`;
+}
+
 function card(k) {
-  const tags = (k.tags || "")
-    .split(",")
+  const tags = (k.tags || '')
+    .split(',')
     .filter(Boolean)
     .map(t => `<span>${t.trim()}</span>`)
-    .join("");
+    .join('');
 
   return `
     <article class="card" data-id="${k.kit_id}">
-      <div class="thumb">
-        <img src="${k.image_url}" alt="${k.name}">
-      </div>
+      ${cardThumb(k)}
       <div class="meta">
-        <h3 class="title">${k.name}</h3>
-        <p><strong>Category:</strong> ${k.category}</p>
-        <p><strong>Location:</strong> ${k.location}</p>
-        <p><strong>Available:</strong> ${k.total_qty}/${k.total_qty}</p>
+        <div class="row">
+          <h3 class="title">${k.name}</h3>
+          ${availabilityBadge(k)}
+        </div>
+        <p class="muted"><strong>Category:</strong> ${k.category}</p>
+        <p class="muted"><strong>Location:</strong> ${k.location}</p>
+        <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
         <div class="tags">${tags}</div>
       </div>
-    </article>
-  `;
+    </article>`;
 }
 
+// ====== LIST ======
 function renderList() {
-  listEl.innerHTML = KITS.map(card).join('');
-  countEl.textContent = `${KITS.length} kits`;
+  const q = searchEl.value.toLowerCase().trim();
+  const cat = categoryEl.value.toLowerCase().trim();
+
+  const filtered = KITS.filter(k => {
+    const hay = [k.name, k.category, k.description, k.tags, k.location].join(' ').toLowerCase();
+    const active = k.active === true || String(k.active).toLowerCase() === "true";
+    const catOk = !cat || String(k.category).toLowerCase() === cat;
+    return active && (!q || hay.includes(q)) && catOk;
+  });
+
+  countEl.textContent = `${filtered.length} kit${filtered.length === 1 ? '' : 's'}`;
+  listEl.innerHTML = filtered.map(card).join('');
 }
 
-// =====================
-// OPEN MODAL
-// =====================
+function populateCategory() {
+  const cats = [...new Set(KITS.map(k => (k.category || '').toLowerCase()))].filter(Boolean);
+  categoryEl.innerHTML =
+    `<option value="">All categories</option>` +
+    cats.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+// ====== CHECKOUT STATE ======
+function updateCheckoutState() {
+  const avail = availabilityFor(CURRENT);
+  mAvail.textContent = `${avail} / ${CURRENT.total_qty}`;
+  const disabled = avail <= 0;
+
+  btnCheckout.disabled = disabled;
+  form.querySelectorAll("input").forEach(i => i.disabled = disabled);
+
+  msg.textContent = disabled ? "Out of stock." : "";
+}
+
+// ====== OPEN MODAL ======
 function openModalById(id) {
   const k = KITS.find(x => x.kit_id === id);
+  if (!k) return;
   CURRENT = k;
 
-  mThumb.innerHTML = `<img src="${k.image_url}" alt="${k.name}">`;
-  mTitle.textContent = k.name;
-  mCat.textContent = k.category;
-  mLoc.textContent = k.location;
-  mAvail.textContent = `${k.total_qty}/${k.total_qty}`;
+  // ⭐ Project IMAGE
+  mThumb.innerHTML = k.image_url
+    ? `<img src="${k.image_url}" alt="${k.name}">`
+    : `<div class="thumb"><div style="font-size:2rem">${(k.name||'?')[0]}</div></div>`;
 
-  mBadges.innerHTML = (k.tags || "")
-    .split(",")
-    .filter(Boolean)
-    .map(t => `<span>${t.trim()}</span>`)
-    .join("");
-
-  mDesc.textContent = k.description;
-
-  // ⭐⭐⭐ REAL QR CODE ⭐⭐⭐
+  // ⭐ QR CODE
   if (k.instructions_url) {
-    const qr = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(k.instructions_url)}`;
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(k.instructions_url)}`;
     mQR.innerHTML = `
-      <a href="${k.instructions_url}" target="_blank">
-        <img src="${qr}" alt="QR code for instructions">
-      </a>
+      <img src="${qrSrc}" alt="QR code for instructions" />
     `;
   } else {
     mQR.innerHTML = "";
   }
 
+  // TEXT INFO
+  mTitle.textContent = k.name;
+  mCat.textContent = k.category;
+  mLoc.textContent = k.location;
+  mDesc.textContent = k.description || "";
+
+  mBadges.innerHTML = (k.tags || "")
+    .split(',')
+    .filter(Boolean)
+    .map(t => `<span>${t.trim()}</span>`)
+    .join('');
+
+  form.reset();
+  msg.textContent = "";
+
   modal.classList.remove("hidden");
+  updateCheckoutState();
 }
 
-// =====================
-// EVENTS
-// =====================
-modalClose.addEventListener("click", () => modal.classList.add("hidden"));
+// ====== CLOSE MODAL ======
+function closeModal() {
+  modal.classList.add("hidden");
+}
 
-listEl.addEventListener("click", e => {
-  const card = e.target.closest(".card");
-  if (card) openModalById(card.dataset.id);
-});
+// ====== WIRING ======
+function wireUI() {
+  modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-// =====================
-// STARTUP
-// =====================
+  listEl.addEventListener('click', e => {
+    const c = e.target.closest('.card');
+    if (c) openModalById(c.dataset.id);
+  });
+
+  searchEl.addEventListener('input', () => {
+    renderList();
+  });
+
+  categoryEl.addEventListener('change', renderList);
+
+  tyOk.addEventListener('click', () => tyModal.classList.add('hidden'));
+
+  // SUBMIT FORM
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!CURRENT) return;
+    if (availabilityFor(CURRENT) <= 0) return;
+
+    const fd = new FormData(form);
+    const name = fd.get("name").trim();
+    const email = fd.get("email").trim();
+    if (!name || !email) return;
+
+    // Fill Google Form
+    document.querySelector('#gf_kit_id').value = CURRENT.kit_id;
+    document.querySelector('#gf_kit_name').value = CURRENT.name;
+    document.querySelector('#gf_user_name').value = name;
+    document.querySelector('#gf_user_email').value = email;
+
+    document.querySelector('#gform').submit();
+
+    // Thank you popup
+    tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>. Please return the <b>box itself</b> after you're done.`;
+    tyModal.classList.remove("hidden");
+
+    closeModal();
+
+    // Refresh availability
+    const oldCount = loansCountForKit(CURRENT.kit_id);
+    setTimeout(() => refreshUntilUpdated(CURRENT.kit_id, oldCount), POST_CHECKOUT_REFRESH_MS);
+  });
+}
+
+// Refresh loop
+async function refreshUntilUpdated(id, oldCount, tries = 0) {
+  await refreshLoansFromSheet();
+  const newCount = loansCountForKit(id);
+
+  if (newCount > oldCount || tries >= 5) {
+    renderList();
+    if (!modal.classList.contains("hidden")) updateCheckoutState();
+    return;
+  }
+
+  setTimeout(() => refreshUntilUpdated(id, oldCount, tries + 1), 2000);
+}
+
+// ====== LOAD DATA ======
+async function loadKits() {
+  try {
+    const res = await fetch('./data/kits.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error("kits.json missing");
+    const data = await res.json();
+
+    KITS = data.map(k => ({ ...k, total_qty:+k.total_qty || 0 }));
+  } catch (e) {
+    console.error("Using fallback sample data:", e);
+
+    KITS = [
+      { kit_id:'KIT-001', name:'Sample Kit', image_url:'', category:'misc', total_qty:1, location:'Studio', description:'Example only', tags:'sample,test', active:true }
+    ];
+  }
+}
+
+// ====== STARTUP ======
 async function startup() {
+  wireUI();
   await loadKits();
+  populateCategory();
+  await refreshLoansFromSheet();
   renderList();
 }
+
 startup();
