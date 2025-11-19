@@ -4,11 +4,11 @@
     "name": "Woodburning Kit",
     "category": "woodworking",
     "total_qty": 2,
-    "available_qty": 2,
     "image_url": "./images/woodburning.jpg",
     "location": "Take and Create Stand",
     "description": "This project will help you get more familiar with using the woodburner. You will learn some burning techniques, have the chance to practice with the woodburner, and finish with a completed art piece.",
     "tags": "wood,art,crafts",
+    "instructions_url": "YOUR_SLIDES_LINK_1",
     "active": true
   },
   {
@@ -16,11 +16,11 @@
     "name": "Vacuum Forming Pot",
     "category": "fabrication",
     "total_qty": 3,
-    "available_qty": 3,
     "image_url": "./images/vacuum-forming.jpg",
     "location": "Take and Create Stand",
     "description": "Become familiarized with vacuum forming by creating a plastic plant pot with a customizable buck!",
     "tags": "plastic,forming,pot",
+    "instructions_url": "YOUR_SLIDES_LINK_2",
     "active": true
   },
   {
@@ -28,11 +28,11 @@
     "name": "Mancala Board",
     "category": "dremel",
     "total_qty": 2,
-    "available_qty": 2,
     "image_url": "./images/board.jpg",
     "location": "Take and Create Stand",
     "description": "Use the Dremel to sand and finish a wooden mancala board — a fun functional project.",
     "tags": "dremel,game,wood",
+    "instructions_url": "YOUR_SLIDES_LINK_3",
     "active": true
   },
   {
@@ -40,11 +40,11 @@
     "name": "Pencil Pouch",
     "category": "sewing",
     "total_qty": 4,
-    "available_qty": 4,
     "image_url": "./images/sewing.jpg",
     "location": "Take and Create Stand",
     "description": "Learn basic setup and stitching on the sewing machine by making your own pencil pouch.",
     "tags": "sewing,fabric,crafts",
+    "instructions_url": "YOUR_SLIDES_LINK_4",
     "active": true
   },
   {
@@ -52,11 +52,11 @@
     "name": "Leather Keychain",
     "category": "leatherwork",
     "total_qty": 3,
-    "available_qty": 3,
     "image_url": "./images/keychain.jpg",
     "location": "Take and Create Stand",
     "description": "Practice leather crafting using a hole punch and rivet setter to create a keychain.",
     "tags": "leather,keychain,crafts",
+    "instructions_url": "YOUR_SLIDES_LINK_5",
     "active": true
   }
 ]
