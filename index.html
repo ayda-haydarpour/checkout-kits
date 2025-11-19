@@ -11,17 +11,17 @@
   <header class="site-header">
     <div class="wrap">
       <div class="brand">
-        <div class="logo-dot" aria-hidden="true"></div>
+        <div class="logo-dot"></div>
         <h1>Equipment Kiosk</h1>
       </div>
 
       <div class="filters">
         <div class="search-wrap">
-          <input id="search" type="search" placeholder="Search kits, tags, categories…" aria-label="Search" autocomplete="off" />
-          <div id="suggestions" class="suggestions" role="listbox"></div>
+          <input id="search" type="search" placeholder="Search kits, tags, categories…" autocomplete="off" />
+          <div id="suggestions" class="suggestions"></div>
         </div>
 
-        <select id="category" aria-label="Filter by category">
+        <select id="category">
           <option value="">All categories</option>
         </select>
       </div>
@@ -38,13 +38,13 @@
       </div>
     </section>
 
-    <section id="kit-list" class="grid wrap" aria-live="polite"></section>
+    <section id="kit-list" class="grid wrap"></section>
   </main>
 
   <!-- DETAILS MODAL -->
-  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div id="modal" class="modal hidden">
     <div class="dialog">
-      <button id="modal-close" class="icon-btn" aria-label="Close">×</button>
+      <button id="modal-close" class="icon-btn">×</button>
 
       <div class="dialog-body">
         <div class="dialog-left">
@@ -54,9 +54,9 @@
         <div class="dialog-right">
           <h2 id="modal-title">Kit</h2>
 
-          <p class="muted"><strong>Category:</strong> <span id="m-cat"></span></p>
-          <p class="muted"><strong>Location:</strong> <span id="m-loc"></span></p>
-          <p class="muted"><strong>Available:</strong> <span id="m-availability"></span></p>
+          <p><strong>Category:</strong> <span id="m-cat"></span></p>
+          <p><strong>Location:</strong> <span id="m-loc"></span></p>
+          <p><strong>Available:</strong> <span id="m-availability"></span></p>
 
           <div id="m-badges" class="tags"></div>
           <p id="m-desc" class="desc"></p>
@@ -69,7 +69,7 @@
               <label>Name <input name="name" required /></label>
               <label>Email <input type="email" name="email" required /></label>
             </div>
-            <button id="checkout-btn" class="btn primary" type="submit">Checkout</button>
+            <button id="checkout-btn" class="btn primary">Checkout</button>
             <span id="checkout-msg" class="msg"></span>
           </form>
         </div>
@@ -78,24 +78,21 @@
     </div>
   </div>
 
-  <!-- THANK YOU POPUP -->
+  <!-- THANK YOU -->
   <div id="thankyou" class="modal hidden">
     <div class="dialog small">
       <div class="dialog-inner">
-        <h2 id="ty-title">Thanks for checking out!</h2>
+        <h2>Thanks for checking out!</h2>
         <p id="ty-msg" class="muted"></p>
         <ul class="checklist">
-          <li>Please <b>take the contents</b> you need.</li>
-          <li>Return the <b>box</b> when done.</li>
+          <li>Take the contents you need.</li>
+          <li>Return the box afterward.</li>
         </ul>
-        <div class="actions">
-          <button id="ty-ok" class="btn primary">Got it</button>
-        </div>
+        <button id="ty-ok" class="btn primary">Got it</button>
       </div>
     </div>
   </div>
 
-  <!-- HIDDEN GOOGLE FORM -->
   <iframe name="gform_iframe" style="display:none;"></iframe>
 
   <form id="gform"
@@ -109,7 +106,6 @@
     <input name="entry.767119339" id="gf_kit_name" />
   </form>
 
-  <script type="module" src="./js/app.js?v=5"></script>
-
+  <script type="module" src="./js/app.js?v=10"></script>
 </body>
 </html>
