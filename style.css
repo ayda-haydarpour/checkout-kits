@@ -55,6 +55,7 @@ body {
   box-shadow:var(--shadow);
   overflow:hidden;
   transition:.12s;
+  cursor:pointer;
 }
 .card:hover { transform:translateY(-2px); }
 
@@ -81,20 +82,18 @@ body {
 .badge.warn { background:#fff7ed; color:#9a3412; }
 .badge.out { background:#fef2f2; color:#991b1b; }
 
-/* ⭐ BUTTON INSIDE CARDS */
+/* ⭐ View Details button */
 .open-btn {
-  margin-top: 0.7rem;
-  width: 100%;
-  padding: 0.55rem 0.8rem;
+  margin-top: 0.6rem;
+  padding: 0.55rem 0.9rem;
   font-size: 0.9rem;
   border-radius: 0.6rem;
   background: var(--maroon);
   color: white;
   border: none;
+  width: 100%;
   cursor: pointer;
-}
-.open-btn:hover {
-  background:#4d0028;
+  touch-action: manipulation;
 }
 
 /* MODAL */
@@ -108,7 +107,7 @@ body {
   padding-top:100px;
 }
 
-/* ⭐ FIX: Prevent hidden modal from blocking iPad touches */
+/* Prevent hidden modal blocking taps */
 .modal.hidden {
   display:none !important;
   pointer-events:none !important;
@@ -121,7 +120,6 @@ body {
   width:min(920px,95vw);
   box-shadow:var(--shadow);
   position:relative;
-
   max-height:90vh;
   overflow-y:auto;
 }
@@ -190,153 +188,56 @@ input {
   border-radius:.7rem;
 }
 
-/*
-============================================
-⭐ iPad Layout — shrink cards + text + images
-============================================
-*/
-@media screen and (min-width: 768px) and (max-width: 1024px) {
-
+/* ======================
+   ⭐ iPad card shrinking
+   ====================== */
+@media screen and (min-width:768px) and (max-width:1024px){
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.75rem;
+    gap:.75rem;
   }
-
-  .card {
-    font-size: 0.9rem;
-    border-radius: 0.75rem;
-  }
-  .meta { padding: 0.65rem; }
-
-  .tags span {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.4rem;
-  }
-
-  .thumb {
-    height: 150px !important;
-  }
-
-  .muted {
-    font-size: 0.8rem;
-  }
-
-  .card .title {
-    font-size: 1rem;
-  }
-}
-
-/*
-=========================================
-⭐ iPad Modal Auto-Fit (no scrolling)
-=========================================
-*/
-@media screen and (min-width: 768px) and (max-width: 1024px) {
-  .dialog {
-    max-height: 90vh !important;
-    transform: scale(0.82);
-    transform-origin: top center;
-  }
-
-  .modal-image img {
-    height: 260px !important;
-  }
-  .modal-qr img {
-    width: 160px !important;
-    height: 160px !important;
-  }
-
-  .dialog-body {
-    gap: 1rem;
-    padding: 1rem;
-  }
-
-  .modal-info {
-    font-size: 0.9rem;
-  }
-  .modal-info h2 {
-    font-size: 1.2rem;
-  }
-
-  .form-row {
-    gap: 0.4rem;
-  }
-
-  input {
-    padding: 0.45rem 0.6rem;
-    font-size: 0.9rem;
-  }
-
-  .btn.primary {
-    padding: 0.55rem 0.8rem;
-    font-size: 0.9rem;
-  }
+  .thumb { height:150px !important; }
+  .card { font-size:.9rem; }
+  .meta { padding:.65rem; }
+  .tags span { font-size:.75rem; }
 }
 
 /* ===========================================
-   ⭐ FINAL iPad Modal Auto-Fit (no scrolling)
-   Much smaller — fits fully on iPad screens
+   ⭐ iPad Modal Auto-Fit (No Scrolling)
    =========================================== */
-@media screen and (min-width: 768px) and (max-width: 1024px) {
+@media screen and (min-width:768px) and (max-width:1024px){
 
-  /* Shrink entire modal */
   .dialog {
-    max-height: 88vh !important; /* fit in screen */
-    width: 85vw !important;
-    transform: scale(0.75);      /* ⭐ smaller modal */
-    transform-origin: top center;
+    max-height:88vh !important;
+    width:85vw !important;
+    transform:scale(.75);
+    transform-origin:top center;
   }
 
-  /* Top row: image + QR */
-  .top-row {
-    gap: 0.5rem;
-  }
-
-  /* Image */
-  .modal-image img {
-    height: 180px !important;   /* was 260 */
-    border-radius: 0.5rem;
-  }
-
-  /* QR code */
-  .modal-qr img {
-    width: 130px !important;     /* was 160 */
-    height: 130px !important;
-  }
-
-  /* Reduce padding */
   .dialog-body {
-    gap: 0.7rem;
-    padding: 0.8rem;
+    gap:.7rem;
+    padding:.8rem;
   }
 
-  /* Text area smaller */
-  .modal-info {
-    font-size: 0.85rem;
-  }
-  .modal-info h2 {
-    font-size: 1.05rem;
-    margin-bottom: 0.2rem;
+  .modal-image img {
+    height:180px !important;
   }
 
-  /* Description */
-  .desc {
-    font-size: 0.8rem;
-    margin-top: 0.4rem;
+  .modal-qr img {
+    width:130px !important;
+    height:130px !important;
   }
 
-  /* Form sizing */
-  .form-row {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.35rem;
-  }
+  .modal-info { font-size:.85rem; }
+  .modal-info h2 { font-size:1.05rem; }
+  .desc { font-size:.8rem; }
+
   input {
-    padding: 0.4rem 0.5rem;
-    font-size: 0.85rem;
+    padding:.4rem .5rem;
+    font-size:.85rem;
   }
   .btn.primary {
-    padding: 0.55rem 0.8rem;
-    font-size: 0.9rem;
-    margin-top: 0.3rem;
+    padding:.55rem .8rem;
+    font-size:.9rem;
   }
 }
