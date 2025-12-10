@@ -55,11 +55,8 @@ body {
   box-shadow:var(--shadow);
   overflow:hidden;
   transition:.12s;
-  cursor:pointer;
 }
-.card:hover { transform:translateY(-2px); }
 
-/* ⭐ Equal image sizes */
 .thumb {
   width:100%;
   aspect-ratio:4 / 3;
@@ -82,25 +79,23 @@ body {
 .badge.warn { background:#fff7ed; color:#9a3412; }
 .badge.out { background:#fef2f2; color:#991b1b; }
 
-/* ⭐ MODAL — CENTERED FIX */
+/* MODAL */
 .modal {
   position:fixed;
   inset:0;
   background:rgba(17,24,39,.48);
   display:flex;
   justify-content:center;
-  align-items:center !important; /* center vertically */
-  padding-top:0 !important;       /* no top offset */
+  align-items:center !important;
+  padding-top:0 !important;
   z-index:100;
 }
 
-/* Prevent iPad from blocking touches */
 .modal.hidden {
   display:none !important;
   pointer-events:none !important;
 }
 
-/* ⭐ Modal dialog size */
 .dialog {
   background:#fff;
   border-radius:1rem;
@@ -108,10 +103,8 @@ body {
   width:min(900px,92vw);
   box-shadow:var(--shadow);
   position:relative;
-
   max-height:90vh;
   overflow-y:auto;
-  
   transform:scale(0.85);
   transform-origin:center top;
 }
@@ -138,26 +131,15 @@ body {
   align-items:flex-start;
 }
 
-/* ⭐ SHOW ENTIRE IMAGE (NO CROPPING) */
-.modal-image {
-  flex:1.2;
-}
 .modal-image img {
   width:100%;
   height:auto;
-  object-fit:contain !important;  /* show whole picture */
-  max-height:220px !important;     /* reduce size */
+  object-fit:contain !important;
+  max-height:220px !important;
   border-radius:.7rem;
   border:1px solid var(--border);
 }
 
-/* QR CODE */
-.modal-qr {
-  flex:.6;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
 .modal-qr img {
   width:160px !important;
   height:160px !important;
@@ -165,11 +147,6 @@ body {
   border:1px solid var(--border);
 }
 
-/* INFO AREA */
-.modal-info { width:100%; }
-.desc { margin-top:.75rem; }
-
-/* FORM */
 .form-row {
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -190,54 +167,44 @@ input {
   cursor:pointer;
 }
 
-/* ============================================
-   ⭐ iPad Layout — Shrink everything more
-   ============================================ */
+/* iPad adjustments */
 @media screen and (min-width:768px) and (max-width:1024px) {
-
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: .7rem;
   }
+  .thumb { height:140px !important; }
+  .dialog { transform:scale(.75); }
+  .modal-image img { max-height:180px !important; }
+  .modal-qr img { width:130px !important; height:130px !important; }
+  .dialog-body { gap:.8rem; padding:1rem; }
+}
 
-  .card {
-    font-size: 0.9rem;
-    border-radius: .75rem;
-  }
+/* ============================
+   ⭐ VIEW DETAILS BUTTON (New)
+   ============================ */
+.open-btn {
+  width: 100%;
+  background: var(--maroon);
+  color: #fff;
+  padding: .55rem .9rem;
+  border: none;
+  border-radius: .6rem;
+  margin-top: .7rem;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,.08);
+  letter-spacing: .3px;
+  transition: background .15s, transform .15s;
+}
 
-  .thumb {
-    height:140px !important;
-  }
+.open-btn:hover {
+  background: #7a1a49;
+  transform: translateY(-2px);
+}
 
-  .thumb img {
-    object-fit:cover;
-  }
-
-  /* ⭐ Modal shrinks more */
-  .dialog {
-    transform:scale(0.75);       /* shrink entire window */
-    max-height:88vh !important;
-  }
-
-  /* Images smaller */
-  .modal-image img {
-    max-height:180px !important;
-  }
-
-  .modal-qr img {
-    width:130px !important;
-    height:130px !important;
-  }
-
-  .dialog-body {
-    gap:.8rem;
-    padding:1rem;
-  }
-
-  .modal-info h2 {
-    font-size:1.1rem;
-  }
-
-  input { font-size:.85rem; padding:.45rem .6rem; }
-  .btn.primary { padding:.55rem .75rem; font-size:.9rem; }
+.open-btn:active {
+  transform: scale(.97);
 }
