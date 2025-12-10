@@ -220,3 +220,57 @@ input {
     font-size: 1rem;
   }
 }
+
+/* ======================================
+   ⭐ iPad Modal Auto-Fit (no scrolling)
+   ====================================== */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+
+  /* Shrink modal container */
+  .dialog {
+    max-height: 90vh !important;    /* Fit inside viewport */
+    transform: scale(0.82);         /* ⭐ Shrinks the whole window */
+    transform-origin: top center;
+  }
+
+  /* Reduce image & QR size */
+  .modal-image img {
+    height: 260px !important;       /* was huge */
+  }
+
+  .modal-qr img {
+    width: 160px !important;
+    height: 160px !important;
+  }
+
+  /* Reduce spacing */
+  .dialog-body {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .modal-info {
+    font-size: 0.9rem;
+  }
+
+  .modal-info h2 {
+    font-size: 1.2rem;
+  }
+
+  /* Reduce padding so form fits */
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+  }
+
+  input {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .btn.primary {
+    padding: 0.55rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
