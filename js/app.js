@@ -73,8 +73,8 @@ async function fetchLoansFromSheet() {
   const rows = parseCSV(text);
 
   if (!rows.length) return [];
-
   const headers = rows[0].map(h => (h || '').trim().toLowerCase());
+
   const idx = {
     ts: headers.indexOf('timestamp'),
     kit_id: headers.indexOf('kit id'),
@@ -88,15 +88,13 @@ async function fetchLoansFromSheet() {
     const cols = rows[r];
     if (!cols || cols.length < 2) continue;
 
-    const kitId = (cols[idx.kit_id] || '').trim();
-    const kitNm = (cols[idx.kit] || '').trim();
-    const user  = (cols[idx.name] || '').trim();
-    const mail  = (cols[idx.email] || '').trim();
-    const ts    = (cols[idx.ts] || '').trim();
-
-    if (!kitId && !user && !mail) continue;
-
-    out.push({ timestamp:ts, kit_id:kitId, kit_name:kitNm, name:user, email:mail });
+    out.push({
+      timestamp: cols[idx.ts]?.trim(),
+      kit_id: cols[idx.kit_id]?.trim(),
+      kit_name: cols[idx.kit]?.trim(),
+      name: cols[idx.name]?.trim(),
+      email: cols[idx.email]?.trim(),
+    });
   }
   return out;
 }
@@ -123,13 +121,12 @@ function availabilityBadge(k){
   return `<span class="badge ok">In stock</span>`;
 }
 
-// ====== CARDS ======
+// ====== CARD RENDERING ======
 function cardThumb(k){
   if (k.image_url){
     return `<div class="thumb"><img src="${k.image_url}"></div>`;
   }
-  const letter = (k.name || '?')[0].toUpperCase();
-  return `<div class="thumb">${letter}</div>`;
+  return `<div class="thumb">${k.name[0].toUpperCase()}</div>`;
 }
 
 function card(k){
@@ -141,16 +138,18 @@ function card(k){
 
   return `
     <article class="card">
-      <div class="card-inner" data-id="${k.kit_id}">
+      <div class="card-inner">
         ${cardThumb(k)}
         <div class="meta">
           <div class="row">
             <h3 class="title">${k.name}</h3>
             ${availabilityBadge(k)}
           </div>
+
           <p class="muted"><strong>Category:</strong> ${k.category}</p>
           <p class="muted"><strong>Location:</strong> ${k.location}</p>
           <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
+
           <div class="tags">${tags}</div>
 
           <button class="open-btn" data-id="${k.kit_id}">View Details</button>
@@ -159,13 +158,12 @@ function card(k){
     </article>`;
 }
 
-// ====== LIST ======
 function renderList(){
   const q = searchEl.value.toLowerCase().trim();
   const cat = categoryEl.value.toLowerCase();
 
   const filtered = KITS.filter(k => {
-    const hay = [k.name,k.category,k.description,k.tags,k.location].join(' ').toLowerCase();
+    const hay = [k.name, k.category, k.description, k.tags, k.location].join(" ").toLowerCase();
     const active = k.active === true || String(k.active).toLowerCase() === "true";
     const catOk = !cat || k.category.toLowerCase() === cat;
     return active && (!q || hay.includes(q)) && catOk;
@@ -176,13 +174,13 @@ function renderList(){
 }
 
 function populateCategory(){
-  const cats = [...new Set(KITS.map(k => (k.category || '').toLowerCase()))].filter(Boolean);
+  const cats = [...new Set(KITS.map(k => k.category.toLowerCase()))];
   categoryEl.innerHTML =
     `<option value="">All categories</option>` +
     cats.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
-// ====== CHECKOUT STATE ======
+// ====== MODAL ======
 function updateCheckoutState(){
   const avail = availabilityFor(CURRENT);
   mAvail.textContent = `${avail} / ${CURRENT.total_qty}`;
@@ -192,7 +190,6 @@ function updateCheckoutState(){
   msg.textContent = disabled ? "Out of stock." : "";
 }
 
-// ====== OPEN MODAL ======
 function openModalById(id){
   const k = KITS.find(x => x.kit_id === id);
   if (!k) return;
@@ -202,12 +199,9 @@ function openModalById(id){
     ? `<img src="${k.image_url}">`
     : `<div class="thumb"><div style="font-size:2rem">${k.name[0]}</div></div>`;
 
-  if (k.instructions_url){
-    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(k.instructions_url)}`;
-    mQR.innerHTML = `<img src="${qrSrc}">`;
-  } else {
-    mQR.innerHTML = "";
-  }
+  mQR.innerHTML = k.instructions_url
+    ? `<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(k.instructions_url)}">`
+    : "";
 
   mTitle.textContent = k.name;
   mCat.textContent = k.category;
@@ -230,30 +224,23 @@ function closeModal(){
   modal.classList.add("hidden");
 }
 
-// ====== WIRING ======
+// ====== UI EVENTS ======
 function wireUI(){
 
   modalClose.addEventListener('click', closeModal);
-
   modal.addEventListener('click', e => {
     if (e.target === modal) closeModal();
   });
 
-  // ⭐ FIX 1 — prevent card interaction when modal is open
-  listEl.addEventListener("touchstart", e => {
+  // ONLY the button opens the modal
+  document.addEventListener("click", e => {
     if (!modal.classList.contains("hidden")) return;
-
-    const c = e.target.closest(".card-inner");
-    if (c) {
-      openModalById(c.dataset.id);
-      e.preventDefault();
-    }
+    const btn = e.target.closest(".open-btn");
+    if (btn) openModalById(btn.dataset.id);
   });
 
-  // ⭐ FIX 2 — prevent button tap-through when modal is open
   document.addEventListener("touchstart", e => {
     if (!modal.classList.contains("hidden")) return;
-
     const btn = e.target.closest(".open-btn");
     if (btn) {
       openModalById(btn.dataset.id);
@@ -261,28 +248,12 @@ function wireUI(){
     }
   });
 
-  // Desktop click on card
-  listEl.addEventListener("click", e => {
-    if (!modal.classList.contains("hidden")) return;
-
-    const c = e.target.closest(".card-inner");
-    if (c) openModalById(c.dataset.id);
-  });
-
-  // Desktop click on button
-  document.addEventListener("click", e => {
-    if (!modal.classList.contains("hidden")) return;
-
-    const btn = e.target.closest(".open-btn");
-    if (btn) openModalById(btn.dataset.id);
-  });
-
   searchEl.addEventListener('input', renderList);
   categoryEl.addEventListener('change', renderList);
 
   tyOk.addEventListener('click', () => tyModal.classList.add("hidden"));
 
-  // Form submit
+  // FORM SUBMIT
   form.addEventListener("submit", e => {
     e.preventDefault();
     if (!CURRENT) return;
@@ -301,8 +272,8 @@ function wireUI(){
     document.querySelector('#gform').submit();
 
     tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>.`;
-
     tyModal.classList.remove("hidden");
+
     closeModal();
 
     const oldCount = loansCountForKit(CURRENT.kit_id);
