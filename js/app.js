@@ -153,7 +153,6 @@ function card(k){
           <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
           <div class="tags">${tags}</div>
 
-          <!-- ⭐ Button for iPad -->
           <button class="open-btn" data-id="${k.kit_id}">View Details</button>
         </div>
       </div>
@@ -235,16 +234,15 @@ function closeModal(){
 function wireUI(){
 
   modalClose.addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-  // Whole card click (desktop + iPad)
-  listEl.addEventListener("click", e => {
-    const c = e.target.closest(".card-inner");
-    if (c) openModalById(c.dataset.id);
+  modal.addEventListener('click', e => {
+    if (e.target === modal) closeModal();
   });
 
-  // ⭐ iPad-specific tap on card
+  // ⭐ FIX 1 — prevent card interaction when modal is open
   listEl.addEventListener("touchstart", e => {
+    if (!modal.classList.contains("hidden")) return;
+
     const c = e.target.closest(".card-inner");
     if (c) {
       openModalById(c.dataset.id);
@@ -252,8 +250,10 @@ function wireUI(){
     }
   });
 
-  // ⭐ iPad-specific tap on "View Details" button
+  // ⭐ FIX 2 — prevent button tap-through when modal is open
   document.addEventListener("touchstart", e => {
+    if (!modal.classList.contains("hidden")) return;
+
     const btn = e.target.closest(".open-btn");
     if (btn) {
       openModalById(btn.dataset.id);
@@ -261,8 +261,18 @@ function wireUI(){
     }
   });
 
-  // Desktop/laptop click for button
+  // Desktop click on card
+  listEl.addEventListener("click", e => {
+    if (!modal.classList.contains("hidden")) return;
+
+    const c = e.target.closest(".card-inner");
+    if (c) openModalById(c.dataset.id);
+  });
+
+  // Desktop click on button
   document.addEventListener("click", e => {
+    if (!modal.classList.contains("hidden")) return;
+
     const btn = e.target.closest(".open-btn");
     if (btn) openModalById(btn.dataset.id);
   });
