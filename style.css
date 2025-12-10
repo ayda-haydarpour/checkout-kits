@@ -16,11 +16,7 @@ body {
   font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;
 }
 
-.wrap {
-  max-width:1100px;
-  margin:0 auto;
-  padding:0 1rem;
-}
+.wrap { max-width:1100px; margin:0 auto; padding:0 1rem; }
 
 /* HEADER */
 .site-header {
@@ -38,9 +34,7 @@ body {
   padding:1rem;
 }
 .logo-dot {
-  width:14px;
-  height:14px;
-  border-radius:50%;
+  width:14px; height:14px; border-radius:50%;
   background:var(--orange);
   box-shadow:0 0 0 4px rgba(207,68,32,.25);
 }
@@ -68,13 +62,13 @@ body {
 /* ⭐ Equal image sizes */
 .thumb {
   width:100%;
-  aspect-ratio:4/3;
+  aspect-ratio:4 / 3;
   display:flex;
   justify-content:center;
   align-items:center;
-  border:1px solid var(--border);
   border-radius:.75rem;
   overflow:hidden;
+  border:1px solid var(--border);
 }
 .thumb img {
   width:100%;
@@ -88,92 +82,90 @@ body {
 .badge.warn { background:#fff7ed; color:#9a3412; }
 .badge.out { background:#fef2f2; color:#991b1b; }
 
-/* ⭐ View Details button */
-.open-btn {
-  margin-top:0.6rem;
-  padding:0.55rem 0.9rem;
-  font-size:0.9rem;
-  border-radius:0.6rem;
-  background:var(--maroon);
-  color:white;
-  border:none;
-  width:100%;
-  cursor:pointer;
-  touch-action:manipulation;
-}
-
-/* MODAL */
+/* ⭐ MODAL — CENTERED FIX */
 .modal {
   position:fixed;
   inset:0;
   background:rgba(17,24,39,.48);
   display:flex;
   justify-content:center;
-  align-items:flex-start;
-  padding-top:100px;
+  align-items:center !important; /* center vertically */
+  padding-top:0 !important;       /* no top offset */
+  z-index:100;
 }
 
-/* Prevent hidden modal blocking iPad touches */
+/* Prevent iPad from blocking touches */
 .modal.hidden {
   display:none !important;
   pointer-events:none !important;
 }
 
+/* ⭐ Modal dialog size */
 .dialog {
   background:#fff;
   border-radius:1rem;
   border:1px solid var(--border);
-  width:min(920px,95vw);
+  width:min(900px,92vw);
   box-shadow:var(--shadow);
   position:relative;
+
   max-height:90vh;
   overflow-y:auto;
+  
+  transform:scale(0.85);
+  transform-origin:center top;
 }
 
 .icon-btn {
-  position:absolute;
-  top:.8rem;
-  right:.8rem;
-  width:34px;
-  height:34px;
+  position:absolute; top:.8rem; right:.8rem;
+  width:34px; height:34px;
   border-radius:.5rem;
   border:1px solid var(--border);
   background:#fff;
+  cursor:pointer;
 }
 
 .dialog-body {
   display:flex;
   flex-direction:column;
-  gap:1.5rem;
+  gap:1.2rem;
   padding:1.2rem;
 }
 
 .top-row {
   display:flex;
   gap:1rem;
+  align-items:flex-start;
 }
 
-.modal-image { flex:1.3; }
+/* ⭐ SHOW ENTIRE IMAGE (NO CROPPING) */
+.modal-image {
+  flex:1.2;
+}
 .modal-image img {
   width:100%;
+  height:auto;
+  object-fit:contain !important;  /* show whole picture */
+  max-height:220px !important;     /* reduce size */
   border-radius:.7rem;
   border:1px solid var(--border);
-  object-fit:cover;
 }
 
+/* QR CODE */
 .modal-qr {
-  flex:.7;
+  flex:.6;
   display:flex;
   justify-content:center;
   align-items:center;
 }
 .modal-qr img {
-  width:220px;
-  height:220px;
-  border-radius:.75rem;
+  width:160px !important;
+  height:160px !important;
+  border-radius:.7rem;
   border:1px solid var(--border);
 }
 
+/* INFO AREA */
 .modal-info { width:100%; }
 .desc { margin-top:.75rem; }
 
@@ -195,89 +187,41 @@ input {
   border:none;
   padding:.7rem 1rem;
   border-radius:.7rem;
+  cursor:pointer;
 }
 
-/* ==========================================================
-   ⭐ GLOBAL MODAL SHRINK — Fits on ALL screens (laptop + iPad)
-   ========================================================== */
-.dialog {
-  max-height:85vh !important;   /* Never taller than screen */
-  width:75vw !important;        /* Slightly narrower */
-  transform:scale(0.82);        /* Shrink entire modal */
-  transform-origin:top center;
-}
-
-.top-row { gap:0.6rem; }
-
-.modal-image img {
-  height:210px !important;
-  border-radius:0.5rem;
-}
-
-.modal-qr img {
-  width:150px !important;
-  height:150px !important;
-}
-
-.dialog-body {
-  padding:0.9rem !important;
-  gap:1rem !important;
-}
-
-.modal-info { font-size:0.9rem !important; }
-.modal-info h2 { font-size:1.2rem !important; }
-
-.desc {
-  font-size:0.85rem !important;
-}
-
-input {
-  padding:0.45rem 0.55rem !important;
-  font-size:0.9rem !important;
-}
-
-.btn.primary {
-  padding:0.6rem 1rem !important;
-  font-size:0.95rem !important;
-}
-
-/* ======================
-   ⭐ Shrink cards on iPad
-   ====================== */
-@media screen and (min-width:768px) and (max-width:1024px){
+/* ============================================
+   ⭐ iPad Layout — Shrink everything more
+   ============================================ */
+@media screen and (min-width:768px) and (max-width:1024px) {
 
   .grid {
-    grid-template-columns:repeat(auto-fill, minmax(200px,1fr));
-    gap:.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .7rem;
+  }
+
+  .card {
+    font-size: 0.9rem;
+    border-radius: .75rem;
   }
 
   .thumb {
-    height:150px !important;
+    height:140px !important;
   }
 
-  .card { font-size:.9rem; }
-  .meta { padding:.65rem; }
-
-  .tags span {
-    font-size:.75rem;
-    padding:0.15rem 0.4rem;
+  .thumb img {
+    object-fit:cover;
   }
-}
 
-/* ===========================================
-   ⭐ iPad Modal Auto-Fit (extra fine tuning)
-   =========================================== */
-@media screen and (min-width:768px) and (max-width:1024px){
-
+  /* ⭐ Modal shrinks more */
   .dialog {
+    transform:scale(0.75);       /* shrink entire window */
     max-height:88vh !important;
-    width:85vw !important;
-    transform:scale(.75);
-    transform-origin:top center;
   }
 
+  /* Images smaller */
   .modal-image img {
-    height:180px !important;
+    max-height:180px !important;
   }
 
   .modal-qr img {
@@ -286,22 +230,15 @@ input {
   }
 
   .dialog-body {
-    gap:.7rem;
-    padding:.8rem;
+    gap:.8rem;
+    padding:1rem;
   }
 
-  .modal-info { font-size:.85rem; }
-  .modal-info h2 { font-size:1.05rem; }
-
-  .desc { font-size:.8rem; }
-
-  input {
-    padding:.4rem .5rem;
-    font-size:.85rem;
+  .modal-info h2 {
+    font-size:1.1rem;
   }
 
-  .btn.primary {
-    padding:.55rem .8rem;
-    font-size:.9rem;
-  }
+  input { font-size:.85rem; padding:.45rem .6rem; }
+  .btn.primary { padding:.55rem .75rem; font-size:.9rem; }
 }
+
