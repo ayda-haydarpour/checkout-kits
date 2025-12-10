@@ -52,6 +52,7 @@ function parseCSV(text) {
       }
       field += c; i++; continue;
     }
+
     if (c === '"') { inQuotes = true; i++; continue; }
     if (c === ',') { pushField(); i++; continue; }
     if (c === '\n') { pushField(); pushRow(); i++; continue; }
@@ -67,7 +68,7 @@ function parseCSV(text) {
 
 // ====== SHEET FETCH ======
 async function fetchLoansFromSheet() {
-  const res = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
+  const res = await fetch(SHEET_CSV_URL, { cache:'no-store' });
   const text = await res.text();
   const rows = parseCSV(text);
 
@@ -83,7 +84,7 @@ async function fetchLoansFromSheet() {
   };
 
   const out = [];
-  for (let r = 1; r < rows.length; r++) {
+  for (let r=1; r<rows.length; r++) {
     const cols = rows[r];
     if (!cols || cols.length < 2) continue;
 
@@ -95,7 +96,7 @@ async function fetchLoansFromSheet() {
 
     if (!kitId && !user && !mail) continue;
 
-    out.push({ timestamp: ts, kit_id: kitId, kit_name: kitNm, name: user, email: mail });
+    out.push({ timestamp:ts, kit_id:kitId, kit_name:kitNm, name:user, email:mail });
   }
   return out;
 }
@@ -109,29 +110,29 @@ async function refreshLoansFromSheet() {
 }
 
 // ====== AVAILABILITY ======
-function loansCountForKit(id) {
+function loansCountForKit(id){
   return LOANS_SHEET.filter(l => String(l.kit_id) === String(id)).length;
 }
-function availabilityFor(k) {
+function availabilityFor(k){
   return Math.max(0, Number(k.total_qty) - loansCountForKit(k.kit_id));
 }
-function availabilityBadge(k) {
+function availabilityBadge(k){
   const a = availabilityFor(k);
-  if (a <= 0) return `<span class="badge out">Out</span>`;
-  if (a <= 1) return `<span class="badge warn">Low</span>`;
+  if (a<=0) return `<span class="badge out">Out</span>`;
+  if (a<=1) return `<span class="badge warn">Low</span>`;
   return `<span class="badge ok">In stock</span>`;
 }
 
 // ====== CARDS ======
-function cardThumb(k) {
-  if (k.image_url) {
-    return `<div class="thumb"><img src="${k.image_url}" alt="${k.name}"></div>`;
+function cardThumb(k){
+  if (k.image_url){
+    return `<div class="thumb"><img src="${k.image_url}"></div>`;
   }
   const letter = (k.name || '?')[0].toUpperCase();
   return `<div class="thumb">${letter}</div>`;
 }
 
-function card(k) {
+function card(k){
   const tags = (k.tags || '')
     .split(',')
     .filter(Boolean)
@@ -152,6 +153,7 @@ function card(k) {
           <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
           <div class="tags">${tags}</div>
 
+          <!-- ⭐ Button for iPad -->
           <button class="open-btn" data-id="${k.kit_id}">View Details</button>
         </div>
       </div>
@@ -159,22 +161,22 @@ function card(k) {
 }
 
 // ====== LIST ======
-function renderList() {
+function renderList(){
   const q = searchEl.value.toLowerCase().trim();
   const cat = categoryEl.value.toLowerCase();
 
   const filtered = KITS.filter(k => {
-    const hay = [k.name, k.category, k.description, k.tags, k.location].join(' ').toLowerCase();
+    const hay = [k.name,k.category,k.description,k.tags,k.location].join(' ').toLowerCase();
     const active = k.active === true || String(k.active).toLowerCase() === "true";
     const catOk = !cat || k.category.toLowerCase() === cat;
     return active && (!q || hay.includes(q)) && catOk;
   });
 
-  countEl.textContent = `${filtered.length} kit${filtered.length === 1 ? '' : 's'}`;
+  countEl.textContent = `${filtered.length} kit${filtered.length===1?'':'s'}`;
   listEl.innerHTML = filtered.map(card).join('');
 }
 
-function populateCategory() {
+function populateCategory(){
   const cats = [...new Set(KITS.map(k => (k.category || '').toLowerCase()))].filter(Boolean);
   categoryEl.innerHTML =
     `<option value="">All categories</option>` +
@@ -182,30 +184,28 @@ function populateCategory() {
 }
 
 // ====== CHECKOUT STATE ======
-function updateCheckoutState() {
+function updateCheckoutState(){
   const avail = availabilityFor(CURRENT);
   mAvail.textContent = `${avail} / ${CURRENT.total_qty}`;
   const disabled = avail <= 0;
-
   btnCheckout.disabled = disabled;
   form.querySelectorAll("input").forEach(i => i.disabled = disabled);
-
   msg.textContent = disabled ? "Out of stock." : "";
 }
 
 // ====== OPEN MODAL ======
-function openModalById(id) {
+function openModalById(id){
   const k = KITS.find(x => x.kit_id === id);
   if (!k) return;
   CURRENT = k;
 
   mThumb.innerHTML = k.image_url
-    ? `<img src="${k.image_url}" alt="${k.name}">`
-    : `<div class="thumb"><div style="font-size:2rem">${(k.name || '?')[0]}</div></div>`;
+    ? `<img src="${k.image_url}">`
+    : `<div class="thumb"><div style="font-size:2rem">${k.name[0]}</div></div>`;
 
-  if (k.instructions_url) {
-    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(k.instructions_url)}`;
-    mQR.innerHTML = `<img src="${qrSrc}" alt="QR">`;
+  if (k.instructions_url){
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(k.instructions_url)}`;
+    mQR.innerHTML = `<img src="${qrSrc}">`;
   } else {
     mQR.innerHTML = "";
   }
@@ -223,59 +223,57 @@ function openModalById(id) {
 
   form.reset();
   msg.textContent = "";
-
   modal.classList.remove("hidden");
   updateCheckoutState();
 }
 
-// ====== CLOSE MODAL ======
-function closeModal() {
+function closeModal(){
   modal.classList.add("hidden");
 }
 
 // ====== WIRING ======
-function wireUI() {
+function wireUI(){
 
   modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-  // ⭐ DESKTOP — clicks on card or button
-  listEl.addEventListener('click', e => {
-    const btn = e.target.closest(".open-btn");
-    if (btn) {
-      openModalById(btn.dataset.id);
-      return;
-    }
+  // Whole card click (desktop + iPad)
+  listEl.addEventListener("click", e => {
+    const c = e.target.closest(".card-inner");
+    if (c) openModalById(c.dataset.id);
+  });
 
-    const card = e.target.closest(".card-inner");
-    if (card) {
-      openModalById(card.dataset.id);
+  // ⭐ iPad-specific tap on card
+  listEl.addEventListener("touchstart", e => {
+    const c = e.target.closest(".card-inner");
+    if (c) {
+      openModalById(c.dataset.id);
+      e.preventDefault();
     }
   });
 
-  // ⭐ iPAD — use touchend for reliable behavior
-  listEl.addEventListener('touchend', e => {
+  // ⭐ iPad-specific tap on "View Details" button
+  document.addEventListener("touchstart", e => {
     const btn = e.target.closest(".open-btn");
     if (btn) {
       openModalById(btn.dataset.id);
       e.preventDefault();
-      return;
     }
+  });
 
-    const card = e.target.closest(".card-inner");
-    if (card) {
-      openModalById(card.dataset.id);
-      e.preventDefault();
-    }
+  // Desktop/laptop click for button
+  document.addEventListener("click", e => {
+    const btn = e.target.closest(".open-btn");
+    if (btn) openModalById(btn.dataset.id);
   });
 
   searchEl.addEventListener('input', renderList);
   categoryEl.addEventListener('change', renderList);
 
-  tyOk.addEventListener('click', () => tyModal.classList.add('hidden'));
+  tyOk.addEventListener('click', () => tyModal.classList.add("hidden"));
 
   // Form submit
-  form.addEventListener('submit', e => {
+  form.addEventListener("submit", e => {
     e.preventDefault();
     if (!CURRENT) return;
     if (availabilityFor(CURRENT) <= 0) return;
@@ -293,8 +291,8 @@ function wireUI() {
     document.querySelector('#gform').submit();
 
     tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>.`;
-    tyModal.classList.remove("hidden");
 
+    tyModal.classList.remove("hidden");
     closeModal();
 
     const oldCount = loansCountForKit(CURRENT.kit_id);
@@ -302,12 +300,11 @@ function wireUI() {
   });
 }
 
-// ====== REFRESH LOOP ======
-async function refreshUntilUpdated(id, oldCount, tries = 0) {
+async function refreshUntilUpdated(id, oldCount, tries=0){
   await refreshLoansFromSheet();
   const newCount = loansCountForKit(id);
 
-  if (newCount > oldCount || tries >= 5) {
+  if (newCount > oldCount || tries >= 5){
     renderList();
     if (!modal.classList.contains("hidden")) updateCheckoutState();
     return;
@@ -316,10 +313,9 @@ async function refreshUntilUpdated(id, oldCount, tries = 0) {
   setTimeout(() => refreshUntilUpdated(id, oldCount, tries+1), 2000);
 }
 
-// ====== LOAD KITS ======
-async function loadKits() {
+async function loadKits(){
   try {
-    const res = await fetch('./data/kits.json', { cache: 'no-store' });
+    const res = await fetch('./data/kits.json', { cache:'no-store' });
     const data = await res.json();
     KITS = data.map(k => ({ ...k, total_qty:+k.total_qty || 0 }));
   } catch {
@@ -329,8 +325,7 @@ async function loadKits() {
   }
 }
 
-// ====== STARTUP ======
-async function startup() {
+async function startup(){
   wireUI();
   await loadKits();
   populateCategory();
