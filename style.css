@@ -272,3 +272,71 @@ input {
     font-size: 0.9rem;
   }
 }
+
+/* ===========================================
+   ⭐ FINAL iPad Modal Auto-Fit (no scrolling)
+   Much smaller — fits fully on iPad screens
+   =========================================== */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+
+  /* Shrink entire modal */
+  .dialog {
+    max-height: 88vh !important; /* fit in screen */
+    width: 85vw !important;
+    transform: scale(0.75);      /* ⭐ smaller modal */
+    transform-origin: top center;
+  }
+
+  /* Top row: image + QR */
+  .top-row {
+    gap: 0.5rem;
+  }
+
+  /* Image */
+  .modal-image img {
+    height: 180px !important;   /* was 260 */
+    border-radius: 0.5rem;
+  }
+
+  /* QR code */
+  .modal-qr img {
+    width: 130px !important;     /* was 160 */
+    height: 130px !important;
+  }
+
+  /* Reduce padding */
+  .dialog-body {
+    gap: 0.7rem;
+    padding: 0.8rem;
+  }
+
+  /* Text area smaller */
+  .modal-info {
+    font-size: 0.85rem;
+  }
+  .modal-info h2 {
+    font-size: 1.05rem;
+    margin-bottom: 0.2rem;
+  }
+
+  /* Description */
+  .desc {
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+  }
+
+  /* Form sizing */
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+  }
+  input {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  .btn.primary {
+    padding: 0.55rem 0.8rem;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+}
