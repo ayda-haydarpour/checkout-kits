@@ -16,7 +16,11 @@ body {
   font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;
 }
 
-.wrap { max-width:1100px; margin:0 auto; padding:0 1rem; }
+.wrap {
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 1rem;
+}
 
 /* HEADER */
 .site-header {
@@ -34,7 +38,9 @@ body {
   padding:1rem;
 }
 .logo-dot {
-  width:14px; height:14px; border-radius:50%;
+  width:14px;
+  height:14px;
+  border-radius:50%;
   background:var(--orange);
   box-shadow:0 0 0 4px rgba(207,68,32,.25);
 }
@@ -62,7 +68,7 @@ body {
 /* ⭐ Equal image sizes */
 .thumb {
   width:100%;
-  aspect-ratio:4 / 3;
+  aspect-ratio:4/3;
   display:flex;
   justify-content:center;
   align-items:center;
@@ -84,16 +90,16 @@ body {
 
 /* ⭐ View Details button */
 .open-btn {
-  margin-top: 0.6rem;
-  padding: 0.55rem 0.9rem;
-  font-size: 0.9rem;
-  border-radius: 0.6rem;
-  background: var(--maroon);
-  color: white;
-  border: none;
-  width: 100%;
-  cursor: pointer;
-  touch-action: manipulation;
+  margin-top:0.6rem;
+  padding:0.55rem 0.9rem;
+  font-size:0.9rem;
+  border-radius:0.6rem;
+  background:var(--maroon);
+  color:white;
+  border:none;
+  width:100%;
+  cursor:pointer;
+  touch-action:manipulation;
 }
 
 /* MODAL */
@@ -107,7 +113,7 @@ body {
   padding-top:100px;
 }
 
-/* Prevent hidden modal blocking taps */
+/* Prevent hidden modal blocking iPad touches */
 .modal.hidden {
   display:none !important;
   pointer-events:none !important;
@@ -125,8 +131,11 @@ body {
 }
 
 .icon-btn {
-  position:absolute; top:.8rem; right:.8rem;
-  width:34px; height:34px;
+  position:absolute;
+  top:.8rem;
+  right:.8rem;
+  width:34px;
+  height:34px;
   border-radius:.5rem;
   border:1px solid var(--border);
   background:#fff;
@@ -188,22 +197,75 @@ input {
   border-radius:.7rem;
 }
 
+/* ==========================================================
+   ⭐ GLOBAL MODAL SHRINK — Fits on ALL screens (laptop + iPad)
+   ========================================================== */
+.dialog {
+  max-height:85vh !important;   /* Never taller than screen */
+  width:75vw !important;        /* Slightly narrower */
+  transform:scale(0.82);        /* Shrink entire modal */
+  transform-origin:top center;
+}
+
+.top-row { gap:0.6rem; }
+
+.modal-image img {
+  height:210px !important;
+  border-radius:0.5rem;
+}
+
+.modal-qr img {
+  width:150px !important;
+  height:150px !important;
+}
+
+.dialog-body {
+  padding:0.9rem !important;
+  gap:1rem !important;
+}
+
+.modal-info { font-size:0.9rem !important; }
+.modal-info h2 { font-size:1.2rem !important; }
+
+.desc {
+  font-size:0.85rem !important;
+}
+
+input {
+  padding:0.45rem 0.55rem !important;
+  font-size:0.9rem !important;
+}
+
+.btn.primary {
+  padding:0.6rem 1rem !important;
+  font-size:0.95rem !important;
+}
+
 /* ======================
-   ⭐ iPad card shrinking
+   ⭐ Shrink cards on iPad
    ====================== */
 @media screen and (min-width:768px) and (max-width:1024px){
+
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(200px,1fr));
     gap:.75rem;
   }
-  .thumb { height:150px !important; }
+
+  .thumb {
+    height:150px !important;
+  }
+
   .card { font-size:.9rem; }
   .meta { padding:.65rem; }
-  .tags span { font-size:.75rem; }
+
+  .tags span {
+    font-size:.75rem;
+    padding:0.15rem 0.4rem;
+  }
 }
 
 /* ===========================================
-   ⭐ iPad Modal Auto-Fit (No Scrolling)
+   ⭐ iPad Modal Auto-Fit (extra fine tuning)
    =========================================== */
 @media screen and (min-width:768px) and (max-width:1024px){
 
@@ -212,11 +274,6 @@ input {
     width:85vw !important;
     transform:scale(.75);
     transform-origin:top center;
-  }
-
-  .dialog-body {
-    gap:.7rem;
-    padding:.8rem;
   }
 
   .modal-image img {
@@ -228,14 +285,21 @@ input {
     height:130px !important;
   }
 
+  .dialog-body {
+    gap:.7rem;
+    padding:.8rem;
+  }
+
   .modal-info { font-size:.85rem; }
   .modal-info h2 { font-size:1.05rem; }
+
   .desc { font-size:.8rem; }
 
   input {
     padding:.4rem .5rem;
     font-size:.85rem;
   }
+
   .btn.primary {
     padding:.55rem .8rem;
     font-size:.9rem;
