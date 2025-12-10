@@ -241,25 +241,3 @@ input {
   input { font-size:.85rem; padding:.45rem .6rem; }
   .btn.primary { padding:.55rem .75rem; font-size:.9rem; }
 }
-
-/* ===============================
-   FIX iPad Touch Being Blocked
-   =============================== */
-
-/* The header must NOT block touchscreen interactions */
-.site-header {
-  pointer-events: none !important;
-}
-
-.site-header * {
-  pointer-events: auto !important; /* Still allow clicking inside the header */
-}
-
-/* Ensure grid is always touchable */
-#kit-list {
-  position: relative;
-  z-index: 9999 !important;
-  pointer-events: auto !important;
-}
-
-
