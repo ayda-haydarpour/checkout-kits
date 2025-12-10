@@ -58,7 +58,7 @@ body {
 }
 .card:hover { transform:translateY(-2px); }
 
-/* ⭐ FIX: Equal image sizes */
+/* ⭐ Equal image sizes */
 .thumb {
   width:100%;
   aspect-ratio:4 / 3;
@@ -67,12 +67,12 @@ body {
   align-items:center;
   border:1px solid var(--border);
   border-radius:.75rem;
-  overflow:hidden; /* ⭐ FIX */
+  overflow:hidden;
 }
 .thumb img {
   width:100%;
   height:100%;
-  object-fit:cover; /* ⭐ FIX */
+  object-fit:cover;
 }
 
 .meta { padding:.85rem; }
@@ -80,6 +80,22 @@ body {
 .badge.ok { background:#eefbea; color:#166534; }
 .badge.warn { background:#fff7ed; color:#9a3412; }
 .badge.out { background:#fef2f2; color:#991b1b; }
+
+/* ⭐ BUTTON INSIDE CARDS */
+.open-btn {
+  margin-top: 0.7rem;
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.9rem;
+  border-radius: 0.6rem;
+  background: var(--maroon);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.open-btn:hover {
+  background:#4d0028;
+}
 
 /* MODAL */
 .modal {
@@ -106,7 +122,6 @@ body {
   box-shadow:var(--shadow);
   position:relative;
 
-  /* ⭐ FIX: modal scroll, prevents cutoff */
   max-height:90vh;
   overflow-y:auto;
 }
@@ -175,75 +190,62 @@ input {
   border-radius:.7rem;
 }
 
-/* ============================================
-   ⭐ iPad Layout — shrink cards + text + images
-   ============================================ */
+/*
+============================================
+⭐ iPad Layout — shrink cards + text + images
+============================================
+*/
 @media screen and (min-width: 768px) and (max-width: 1024px) {
 
-  /* Smaller grid cards */
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 0.75rem;
   }
 
-  /* Shrink card padding & text size */
   .card {
-    font-size: 0.9rem;   /* text smaller */
+    font-size: 0.9rem;
     border-radius: 0.75rem;
   }
-  .meta { 
-    padding: 0.65rem; 
-  }
+  .meta { padding: 0.65rem; }
 
-  /* Smaller tag pills */
   .tags span {
     font-size: 0.75rem;
     padding: 0.2rem 0.4rem;
   }
 
-  /* ⭐ Shrink the card images */
   .thumb {
-    aspect-ratio: 4/3;
-    height: 150px !important;   /* was auto, now fixed smaller */
-  }
-  .thumb img {
-    object-fit: cover;
+    height: 150px !important;
   }
 
-  /* Category + location text */
   .muted {
     font-size: 0.8rem;
   }
 
-  /* Title smaller */
   .card .title {
     font-size: 1rem;
   }
 }
 
-/* ======================================
-   ⭐ iPad Modal Auto-Fit (no scrolling)
-   ====================================== */
+/*
+=========================================
+⭐ iPad Modal Auto-Fit (no scrolling)
+=========================================
+*/
 @media screen and (min-width: 768px) and (max-width: 1024px) {
-
-  /* Shrink modal container */
   .dialog {
-    max-height: 90vh !important;    /* Fit inside viewport */
-    transform: scale(0.82);         /* ⭐ Shrinks the whole window */
+    max-height: 90vh !important;
+    transform: scale(0.82);
     transform-origin: top center;
   }
 
-  /* Reduce image & QR size */
   .modal-image img {
-    height: 260px !important;       /* was huge */
+    height: 260px !important;
   }
-
   .modal-qr img {
     width: 160px !important;
     height: 160px !important;
   }
 
-  /* Reduce spacing */
   .dialog-body {
     gap: 1rem;
     padding: 1rem;
@@ -252,14 +254,11 @@ input {
   .modal-info {
     font-size: 0.9rem;
   }
-
   .modal-info h2 {
     font-size: 1.2rem;
   }
 
-  /* Reduce padding so form fits */
   .form-row {
-    grid-template-columns: 1fr 1fr;
     gap: 0.4rem;
   }
 
@@ -273,4 +272,3 @@ input {
     font-size: 0.9rem;
   }
 }
-
