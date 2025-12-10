@@ -58,14 +58,21 @@ body {
 }
 .card:hover { transform:translateY(-2px); }
 
+/* ⭐ FIX: Equal image sizes */
 .thumb {
-  width:100%; aspect-ratio:4/3;
-  display:flex; justify-content:center; align-items:center;
+  width:100%;
+  aspect-ratio:4 / 3;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   border:1px solid var(--border);
   border-radius:.75rem;
+  overflow:hidden; /* ⭐ FIX */
 }
 .thumb img {
-  width:100%; height:100%; object-fit:cover;
+  width:100%;
+  height:100%;
+  object-fit:cover; /* ⭐ FIX */
 }
 
 .meta { padding:.85rem; }
@@ -82,9 +89,14 @@ body {
   display:flex;
   justify-content:center;
   align-items:flex-start;
-  padding-top:100px; /* ⭐ FIX: keeps modal under header */
+  padding-top:100px;
 }
-.modal.hidden { display:none; }
+
+/* ⭐ FIX: Prevent hidden modal from blocking iPad touches */
+.modal.hidden {
+  display:none !important;
+  pointer-events:none !important;
+}
 
 .dialog {
   background:#fff;
@@ -93,7 +105,12 @@ body {
   width:min(920px,95vw);
   box-shadow:var(--shadow);
   position:relative;
+
+  /* ⭐ FIX: modal scroll, prevents cutoff */
+  max-height:90vh;
+  overflow-y:auto;
 }
+
 .icon-btn {
   position:absolute; top:.8rem; right:.8rem;
   width:34px; height:34px;
@@ -102,7 +119,6 @@ body {
   background:#fff;
 }
 
-/* ⭐ NEW LAYOUT */
 .dialog-body {
   display:flex;
   flex-direction:column;
@@ -110,7 +126,6 @@ body {
   padding:1.2rem;
 }
 
-/* ⭐ IMAGE + QR SIDE-BY-SIDE */
 .top-row {
   display:flex;
   gap:1rem;
@@ -137,7 +152,6 @@ body {
   border:1px solid var(--border);
 }
 
-/* INFO SECTION */
 .modal-info { width:100%; }
 .desc { margin-top:.75rem; }
 
@@ -160,30 +174,3 @@ input {
   padding:.7rem 1rem;
   border-radius:.7rem;
 }
-
-/* =============================== */
-/*      IPAD LAYOUT STABILIZER     */
-/* =============================== */
-@media screen and (min-width: 768px) and (max-width: 1024px) {
-  
-  /* Keep page width consistent */
-  .wrap {
-    max-width: 900px !important;
-  }
-
-  /* Prevent grid from shrinking too much */
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
-  }
-
-  /* Keep modal size consistent */
-  .dialog {
-    width: 900px !important;
-  }
-
-  /* Keep image + QR side-by-side in modal */
-  .top-row {
-    flex-direction: row !important;
-  }
-}
-
