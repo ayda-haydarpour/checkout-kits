@@ -2,13 +2,11 @@
 const SHEET_CSV_URL =
   "https://docs.google.com/spreadsheets/d/1lqo329RPwuBE9E39ImGlcL0d9zmXP8Clf_rgOAOMrGo/export?format=csv";
 
-// How long after checkout to re-pull the sheet (ms)
 const POST_CHECKOUT_REFRESH_MS = 2500;
 
-// ====== DOM REFS ======
+// ====== DOM REFERENCES ======
 const listEl = document.querySelector('#kit-list');
 const searchEl = document.querySelector('#search');
-const suggestionsEl = document.querySelector('#suggestions');
 const categoryEl = document.querySelector('#category');
 const countEl = document.querySelector('#count');
 
@@ -28,12 +26,11 @@ const form = document.querySelector('#checkout-form');
 const btnCheckout = document.querySelector('#checkout-btn');
 const msg = document.querySelector('#checkout-msg');
 
-// Thank-you popup
 const tyModal = document.querySelector('#thankyou');
-const tyMsg   = document.querySelector('#ty-msg');
-const tyOk    = document.querySelector('#ty-ok');
+const tyMsg = document.querySelector('#ty-msg');
+const tyOk = document.querySelector('#ty-ok');
 
-// ====== APP STATE ======
+// ====== STATE ======
 let KITS = [];
 let CURRENT = null;
 let LOANS_SHEET = [];
@@ -41,13 +38,14 @@ let LOANS_SHEET = [];
 // ====== CSV PARSER ======
 function parseCSV(text) {
   const rows = [];
-  let i = 0, field = '', row = [], inQuotes = false;
+  let field = "", row = [], i = 0, inQuotes = false;
 
-  const pushField = () => { row.push(field); field = ''; };
+  const pushField = () => { row.push(field); field = ""; };
   const pushRow = () => { rows.push(row); row = []; };
 
   while (i < text.length) {
     const c = text[i];
+
     if (inQuotes) {
       if (c === '"') {
         if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
@@ -64,21 +62,21 @@ function parseCSV(text) {
     field += c;
     i++;
   }
-
   if (field.length || row.length) { pushField(); pushRow(); }
+
   return rows;
 }
 
-// ====== SHEET FETCH ======
+// ====== FETCH LOANS FROM SHEET ======
 async function fetchLoansFromSheet() {
   const res = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch CSV');
+  if (!res.ok) return [];
+
   const text = await res.text();
   const rows = parseCSV(text);
-
   if (!rows.length) return [];
 
-  const headers = rows[0].map(h => (h || '').trim().toLowerCase());
+  const headers = rows[0].map(h => h.trim().toLowerCase());
   const idx = {
     ts: headers.indexOf('timestamp'),
     kit_id: headers.indexOf('kit id'),
@@ -92,15 +90,15 @@ async function fetchLoansFromSheet() {
     const cols = rows[r];
     if (!cols || cols.length < 2) continue;
 
-    const kitId = (cols[idx.kit_id] || '').trim();
-    const kitNm = (cols[idx.kit] || '').trim();
-    const user  = (cols[idx.name] || '').trim();
-    const mail  = (cols[idx.email] || '').trim();
-    const ts    = (cols[idx.ts] || '').trim();
+    const kitId = (cols[idx.kit_id] || "").trim();
+    const kitNm = (cols[idx.kit] || "").trim();
+    const user = (cols[idx.name] || "").trim();
+    const email = (cols[idx.email] || "").trim();
+    const ts = (cols[idx.ts] || "").trim();
 
-    if (!kitId && !user && !mail) continue;
+    if (!kitId && !user && !email) continue;
 
-    out.push({ timestamp: ts, kit_id: kitId, kit_name: kitNm, name: user, email: mail });
+    out.push({ timestamp: ts, kit_id: kitId, kit_name: kitNm, name: user, email });
   }
 
   return out;
@@ -109,8 +107,7 @@ async function fetchLoansFromSheet() {
 async function refreshLoansFromSheet() {
   try {
     LOANS_SHEET = await fetchLoansFromSheet();
-  } catch (e) {
-    console.warn("Could not refresh sheet:", e);
+  } catch {
     LOANS_SHEET = [];
   }
 }
@@ -120,7 +117,7 @@ function loansCountForKit(id) {
   return LOANS_SHEET.filter(l => String(l.kit_id) === String(id)).length;
 }
 function availabilityFor(k) {
-  return Math.max(0, Number(k.total_qty) - loansCountForKit(k.kit_id));
+  return Math.max(0, k.total_qty - loansCountForKit(k.kit_id));
 }
 function availabilityBadge(k) {
   const a = availabilityFor(k);
@@ -129,21 +126,20 @@ function availabilityBadge(k) {
   return `<span class="badge ok">In stock</span>`;
 }
 
-// ====== CARDS ======
+// ====== CARD HTML ======
 function cardThumb(k) {
   if (k.image_url) {
     return `<div class="thumb"><img src="${k.image_url}" alt="${k.name}"></div>`;
   }
-  const letter = (k.name || '?')[0].toUpperCase();
-  return `<div class="thumb">${letter}</div>`;
+  return `<div class="thumb">${(k.name || "?")[0]}</div>`;
 }
 
 function card(k) {
-  const tags = (k.tags || '')
-    .split(',')
+  const tags = (k.tags || "")
+    .split(",")
     .filter(Boolean)
     .map(t => `<span>${t.trim()}</span>`)
-    .join('');
+    .join("");
 
   return `
     <article class="card" data-id="${k.kit_id}">
@@ -157,110 +153,119 @@ function card(k) {
         <p class="muted"><strong>Location:</strong> ${k.location}</p>
         <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
         <div class="tags">${tags}</div>
+
+        <!-- ⭐ BUTTON FOR iPad -->
+        <button class="open-btn" data-id="${k.kit_id}">View Details</button>
       </div>
     </article>`;
 }
 
-// ====== LIST ======
+// ====== RENDER LIST ======
 function renderList() {
   const q = searchEl.value.toLowerCase().trim();
   const cat = categoryEl.value.toLowerCase().trim();
 
   const filtered = KITS.filter(k => {
-    const hay = [k.name, k.category, k.description, k.tags, k.location].join(' ').toLowerCase();
+    const hay = [k.name, k.category, k.description, k.tags, k.location]
+      .join(" ")
+      .toLowerCase();
+
     const active = k.active === true || String(k.active).toLowerCase() === "true";
-    const catOk = !cat || String(k.category).toLowerCase() === cat;
+    const catOk = !cat || k.category.toLowerCase() === cat;
+
     return active && (!q || hay.includes(q)) && catOk;
   });
 
-  countEl.textContent = `${filtered.length} kit${filtered.length === 1 ? '' : 's'}`;
-  listEl.innerHTML = filtered.map(card).join('');
+  countEl.textContent = `${filtered.length} kit${filtered.length === 1 ? "" : "s"}`;
+  listEl.innerHTML = filtered.map(card).join("");
 }
 
+// ====== CATEGORY DROPDOWN ======
 function populateCategory() {
-  const cats = [...new Set(KITS.map(k => (k.category || '').toLowerCase()))].filter(Boolean);
+  const cats = [...new Set(KITS.map(k => k.category.toLowerCase()))].filter(Boolean);
   categoryEl.innerHTML =
     `<option value="">All categories</option>` +
-    cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    cats.map(c => `<option value="${c}">${c}</option>`).join("");
 }
 
-// ====== CHECKOUT STATE ======
-function updateCheckoutState() {
-  const avail = availabilityFor(CURRENT);
-  mAvail.textContent = `${avail} / ${CURRENT.total_qty}`;
-  const disabled = avail <= 0;
-
-  btnCheckout.disabled = disabled;
-  form.querySelectorAll("input").forEach(i => i.disabled = disabled);
-
-  msg.textContent = disabled ? "Out of stock." : "";
-}
-
-// ====== OPEN MODAL ======
+// ====== MODAL ======
 function openModalById(id) {
   const k = KITS.find(x => x.kit_id === id);
   if (!k) return;
+
   CURRENT = k;
 
-  // ⭐ Project IMAGE
+  // Image
   mThumb.innerHTML = k.image_url
     ? `<img src="${k.image_url}" alt="${k.name}">`
-    : `<div class="thumb"><div style="font-size:2rem">${(k.name||'?')[0]}</div></div>`;
+    : `<div class="thumb">${k.name[0]}</div>`;
 
-  // ⭐ QR CODE
+  // QR
   if (k.instructions_url) {
-    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(k.instructions_url)}`;
-    mQR.innerHTML = `
-      <img src="${qrSrc}" alt="QR code for instructions" />
-    `;
+    const qr = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(k.instructions_url)}`;
+    mQR.innerHTML = `<img src="${qr}" alt="QR code">`;
   } else {
     mQR.innerHTML = "";
   }
 
-  // TEXT INFO
   mTitle.textContent = k.name;
   mCat.textContent = k.category;
   mLoc.textContent = k.location;
+  mAvail.textContent = `${availabilityFor(k)} / ${k.total_qty}`;
   mDesc.textContent = k.description || "";
 
   mBadges.innerHTML = (k.tags || "")
-    .split(',')
+    .split(",")
     .filter(Boolean)
     .map(t => `<span>${t.trim()}</span>`)
-    .join('');
-
-  form.reset();
-  msg.textContent = "";
+    .join("");
 
   modal.classList.remove("hidden");
   updateCheckoutState();
 }
 
-// ====== CLOSE MODAL ======
 function closeModal() {
   modal.classList.add("hidden");
 }
 
-// ====== WIRING ======
-function wireUI() {
-  modalClose.addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+// ====== CHECKOUT STATE ======
+function updateCheckoutState() {
+  const avail = availabilityFor(CURRENT);
+  btnCheckout.disabled = avail <= 0;
+  form.querySelectorAll("input").forEach(i => (i.disabled = avail <= 0));
+  msg.textContent = avail <= 0 ? "Out of stock." : "";
+}
 
-  listEl.addEventListener('click', e => {
-    const c = e.target.closest('.card');
+// ====== EVENT WIRING ======
+function wireUI() {
+  modalClose.addEventListener("click", closeModal);
+  modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+
+  // Desktop: click entire card
+  listEl.addEventListener("click", e => {
+    const c = e.target.closest(".card");
     if (c) openModalById(c.dataset.id);
   });
 
-  searchEl.addEventListener('input', () => {
-    renderList();
+  // ⭐ iPad: reliable button click
+  document.addEventListener("click", e => {
+    const btn = e.target.closest(".open-btn");
+    if (btn) openModalById(btn.dataset.id);
   });
 
-  categoryEl.addEventListener('change', renderList);
+  // ⭐ iPad: touch support
+  document.addEventListener("touchstart", e => {
+    const btn = e.target.closest(".open-btn");
+    if (btn) openModalById(btn.dataset.id);
+  });
 
-  tyOk.addEventListener('click', () => tyModal.classList.add('hidden'));
+  searchEl.addEventListener("input", renderList);
+  categoryEl.addEventListener("change", renderList);
+
+  tyOk.addEventListener("click", () => tyModal.classList.add("hidden"));
 
   // SUBMIT FORM
-  form.addEventListener('submit', async e => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
     if (!CURRENT) return;
     if (availabilityFor(CURRENT) <= 0) return;
@@ -270,27 +275,24 @@ function wireUI() {
     const email = fd.get("email").trim();
     if (!name || !email) return;
 
-    // Fill Google Form
-    document.querySelector('#gf_kit_id').value = CURRENT.kit_id;
-    document.querySelector('#gf_kit_name').value = CURRENT.name;
-    document.querySelector('#gf_user_name').value = name;
-    document.querySelector('#gf_user_email').value = email;
+    document.querySelector("#gf_kit_id").value = CURRENT.kit_id;
+    document.querySelector("#gf_kit_name").value = CURRENT.name;
+    document.querySelector("#gf_user_name").value = name;
+    document.querySelector("#gf_user_email").value = email;
 
-    document.querySelector('#gform').submit();
+    document.querySelector("#gform").submit();
 
-    // Thank you popup
-    tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>. Please return the <b>box itself</b> after you're done.`;
+    tyMsg.innerHTML = `You checked out <b>${CURRENT.name}</b>.`;
     tyModal.classList.remove("hidden");
 
     closeModal();
 
-    // Refresh availability
     const oldCount = loansCountForKit(CURRENT.kit_id);
     setTimeout(() => refreshUntilUpdated(CURRENT.kit_id, oldCount), POST_CHECKOUT_REFRESH_MS);
   });
 }
 
-// Refresh loop
+// ====== WAIT FOR UPDATE ======
 async function refreshUntilUpdated(id, oldCount, tries = 0) {
   await refreshLoansFromSheet();
   const newCount = loansCountForKit(id);
@@ -304,19 +306,26 @@ async function refreshUntilUpdated(id, oldCount, tries = 0) {
   setTimeout(() => refreshUntilUpdated(id, oldCount, tries + 1), 2000);
 }
 
-// ====== LOAD DATA ======
+// ====== LOAD KIT DATA ======
 async function loadKits() {
   try {
-    const res = await fetch('./data/kits.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error("kits.json missing");
+    const res = await fetch("./data/kits.json", { cache: "no-store" });
     const data = await res.json();
-
-    KITS = data.map(k => ({ ...k, total_qty:+k.total_qty || 0 }));
+    KITS = data.map(k => ({ ...k, total_qty: +k.total_qty || 0 }));
   } catch (e) {
-    console.error("Using fallback sample data:", e);
-
+    console.error("Error loading kits.json", e);
     KITS = [
-      { kit_id:'KIT-001', name:'Sample Kit', image_url:'', category:'misc', total_qty:1, location:'Studio', description:'Example only', tags:'sample,test', active:true }
+      {
+        kit_id: "KIT-001",
+        name: "Sample Kit",
+        image_url: "",
+        category: "misc",
+        total_qty: 1,
+        location: "Studio",
+        description: "Example only",
+        tags: "sample,test",
+        active: true
+      }
     ];
   }
 }
