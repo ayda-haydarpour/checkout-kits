@@ -174,3 +174,49 @@ input {
   padding:.7rem 1rem;
   border-radius:.7rem;
 }
+
+/* ============================================
+   ⭐ iPad Layout — shrink cards + text + images
+   ============================================ */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+
+  /* Smaller grid cards */
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+
+  /* Shrink card padding & text size */
+  .card {
+    font-size: 0.9rem;   /* text smaller */
+    border-radius: 0.75rem;
+  }
+  .meta { 
+    padding: 0.65rem; 
+  }
+
+  /* Smaller tag pills */
+  .tags span {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  /* ⭐ Shrink the card images */
+  .thumb {
+    aspect-ratio: 4/3;
+    height: 150px !important;   /* was auto, now fixed smaller */
+  }
+  .thumb img {
+    object-fit: cover;
+  }
+
+  /* Category + location text */
+  .muted {
+    font-size: 0.8rem;
+  }
+
+  /* Title smaller */
+  .card .title {
+    font-size: 1rem;
+  }
+}
