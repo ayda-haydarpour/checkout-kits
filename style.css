@@ -160,3 +160,30 @@ input {
   padding:.7rem 1rem;
   border-radius:.7rem;
 }
+
+/* =============================== */
+/*      IPAD LAYOUT STABILIZER     */
+/* =============================== */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  
+  /* Keep page width consistent */
+  .wrap {
+    max-width: 900px !important;
+  }
+
+  /* Prevent grid from shrinking too much */
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+  }
+
+  /* Keep modal size consistent */
+  .dialog {
+    width: 900px !important;
+  }
+
+  /* Keep image + QR side-by-side in modal */
+  .top-row {
+    flex-direction: row !important;
+  }
+}
+
