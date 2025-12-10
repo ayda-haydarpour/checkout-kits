@@ -135,30 +135,33 @@ function cardThumb(k) {
 }
 
 function card(k) {
-  const tags = (k.tags || "")
-    .split(",")
+  const tags = (k.tags || '')
+    .split(',')
     .filter(Boolean)
     .map(t => `<span>${t.trim()}</span>`)
-    .join("");
+    .join('');
 
   return `
-    <article class="card" data-id="${k.kit_id}">
-      ${cardThumb(k)}
-      <div class="meta">
-        <div class="row">
-          <h3 class="title">${k.name}</h3>
-          ${availabilityBadge(k)}
-        </div>
-        <p class="muted"><strong>Category:</strong> ${k.category}</p>
-        <p class="muted"><strong>Location:</strong> ${k.location}</p>
-        <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
-        <div class="tags">${tags}</div>
+    <article class="card">
+      <div class="card-inner" data-id="${k.kit_id}">
+        ${cardThumb(k)}
+        <div class="meta">
+          <div class="row">
+            <h3 class="title">${k.name}</h3>
+            ${availabilityBadge(k)}
+          </div>
+          <p class="muted"><strong>Category:</strong> ${k.category}</p>
+          <p class="muted"><strong>Location:</strong> ${k.location}</p>
+          <p class="muted"><strong>Available:</strong> <b>${availabilityFor(k)}</b> / ${k.total_qty}</p>
+          <div class="tags">${tags}</div>
 
-        <!-- ⭐ BUTTON FOR iPad -->
-        <button class="open-btn" data-id="${k.kit_id}">View Details</button>
+          <!-- ⭐ Tablet-safe button -->
+          <button class="open-btn" data-id="${k.kit_id}">View Details</button>
+        </div>
       </div>
     </article>`;
 }
+
 
 // ====== RENDER LIST ======
 function renderList() {
